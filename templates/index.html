@@ -2074,6 +2074,8 @@
   </main>
 
   <!-- ── Toast ─────────────────────────────────────────────────────────────── -->
+  <div id="toast"></div>
+
   <!-- Claim Detail Overlay -->
   <div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
     <div class="detail-panel" onclick="event.stopPropagation()">
@@ -3211,6 +3213,7 @@
     let toastTimer;
     function showToast(msg, type = 'error') {
       const t = document.getElementById('toast');
+      if (!t) return;
       t.textContent = (type === 'error' ? '⚠️ ' : '✅ ') + msg;
       t.className = 'show ' + type;
       clearTimeout(toastTimer);
