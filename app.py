@@ -12,8 +12,12 @@ from flask_cors import CORS
 from analyzer import analyze
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-CORS(app) # Enable CORS for all routes
+CORS(app, resources={r"/api/*": {"origins": "*"}}) # Explicitly allow all origins for /api routes
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
+
+import sys
+def log_err(msg):
+    print(f"ERROR: {msg}", file=sys.stderr)
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -95,6 +99,7 @@ def analyze_sample():
                 col_map = {k: v for k, v in cols.items() if v}
                 _put_df(fname, df, col_map)
             except Exception as e:
+                log_err(f"Analyze Sample Failed for {fname}: {str(e)}")
                 results.append({"file": fname, "error": str(e)})
     if not results:
         return jsonify({"error": "No sample files found"}), 404
