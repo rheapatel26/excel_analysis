@@ -12,16 +12,24 @@ from flask_cors import CORS
 from analyzer import analyze
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-CORS(app, resources={r"/api/*": {"origins": "*"}}) # Explicitly allow all origins for /api routes
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
-import sys
-def log_err(msg):
-    print(f"ERROR: {msg}", file=sys.stderr)
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    return '', 200
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SAMPLE_FILES = [
+    
     "Claims Summary_API HOLDINGS_040202026.xlsb",
     "Claims Summary_Aarman Solutions_04022026.xlsb",
     "OG-26-1908-8403-00000070 Claim MIS.xlsx",
@@ -50,33 +58,46 @@ def index():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_upload():
+    print("📢 Analysis request received")
     if "file" not in request.files:
+        print("❌ No file in request")
         return jsonify({"error": "No file uploaded"}), 400
     f = request.files["file"]
     if not f.filename:
+        print("❌ Empty filename")
         return jsonify({"error": "Empty filename"}), 400
     ext = os.path.splitext(f.filename)[1].lower()
+    print(f"📂 Processing file: {f.filename} (ext: {ext})")
     if ext not in (".xlsx", ".xlsb", ".xls"):
+        print(f"❌ Unsupported extension: {ext}")
         return jsonify({"error": "Only .xlsx / .xlsb / .xls files are supported"}), 400
 
     with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
         f.save(tmp.name)
         tmp_path = tmp.name
+        print(f"💾 Saved to temp: {tmp_path}")
 
     try:
         from analyzer import read_file, _best_sheet, ALIASES, _find_col
+        print("🔍 Running analysis engine...")
         result = analyze(tmp_path)
         result["file"] = f.filename
+        print("✅ Analysis engine finished")
 
         # Cache the DataFrame for NL querying
+        print("⚙️ Caching DataFrame for chat...")
         sheets = read_file(tmp_path)
         df = _best_sheet(sheets)
         cols = {role: _find_col(df, role) for role in ALIASES}
         col_map = {k: v for k, v in cols.items() if v}
         _put_df(f.filename, df, col_map)
+        print("🚀 Analysis complete, returning response")
 
         return jsonify(result)
     except Exception as e:
+        print(f"🔥 ERROR in analyze_upload: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
     finally:
         os.unlink(tmp_path)
@@ -99,7 +120,6 @@ def analyze_sample():
                 col_map = {k: v for k, v in cols.items() if v}
                 _put_df(fname, df, col_map)
             except Exception as e:
-                log_err(f"Analyze Sample Failed for {fname}: {str(e)}")
                 results.append({"file": fname, "error": str(e)})
     if not results:
         return jsonify({"error": "No sample files found"}), 404
