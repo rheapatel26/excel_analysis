@@ -1,0 +1,3455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClaimIQ – Agentic AI Claim Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #080c18;
+      --bg2: #0e1628;
+      --bg3: #141d35;
+      --card: #111827;
+      --card2: #1a2340;
+      --border: rgba(99, 120, 220, 0.18);
+      --accent: #6c8fff;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --accent4: #f59e0b;
+      --danger: #f87171;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --glow: rgba(108, 143, 255, 0.15);
+      --glow2: rgba(167, 139, 250, 0.12);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ─────────────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg3);
+      border-radius: 4px;
+    }
+
+    /* ── Noise overlay ─────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    /* ── Header ────────────────────────────────────── */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background: linear-gradient(90deg, rgba(108, 143, 255, 0.07), rgba(167, 139, 250, 0.05));
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6c8fff, #a78bfa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(108, 143, 255, 0.4);
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      color: var(--accent2);
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .header-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--accent3);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── Main layout ───────────────────────────────── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 40px 40px 80px;
+    }
+
+    /* ── Upload zone ───────────────────────────────── */
+    #upload-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 60px 0 40px;
+      transition: all 0.4s ease;
+    }
+
+    #upload-section.hidden {
+      display: none;
+    }
+
+    .hero-title {
+      font-size: 52px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #e2e8f0 0%, #6c8fff 50%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--text2);
+      text-align: center;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .upload-zone {
+      width: 100%;
+      max-width: 640px;
+      border: 2px dashed rgba(108, 143, 255, 0.35);
+      border-radius: var(--radius);
+      padding: 52px 40px;
+      text-align: center;
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(108, 143, 255, 0.04), rgba(167, 139, 250, 0.04));
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108, 143, 255, 0.08), transparent 70%);
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      box-shadow: 0 0 40px var(--glow);
+      background: linear-gradient(135deg, rgba(108, 143, 255, 0.08), rgba(167, 139, 250, 0.06));
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .upload-label {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .upload-label span {
+      color: var(--accent);
+    }
+
+    .upload-hint {
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 8px;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 640px;
+      color: var(--text3);
+      font-size: 13px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6c8fff, #a78bfa);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(108, 143, 255, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(108, 143, 255, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--card2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg3);
+      border-color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      max-width: 640px;
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+
+    /* ── Loading spinner ───────────────────────────── */
+    #loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 80px 0;
+    }
+
+    #loading.visible {
+      display: flex;
+    }
+
+    .spinner {
+      width: 56px;
+      height: 56px;
+      border: 3px solid rgba(108, 143, 255, 0.15);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      color: var(--text2);
+      font-size: 15px;
+    }
+
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .loading-step {
+      font-size: 13px;
+      color: var(--text3);
+      transition: color 0.3s;
+    }
+
+    .loading-step.active {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Dashboard ─────────────────────────────────── */
+    #dashboard {
+      display: none;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    #dashboard.visible {
+      display: flex;
+    }
+
+    /* ── Dashboard header ─────────────────────────── */
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .file-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .file-icon {
+      font-size: 28px;
+    }
+
+    .file-name {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .file-meta {
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .file-switcher {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .file-tab {
+      padding: 7px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      transition: all 0.2s;
+    }
+
+    .file-tab:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .file-tab.active {
+      background: linear-gradient(135deg, rgba(108, 143, 255, 0.2), rgba(167, 139, 250, 0.15));
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── KPI cards ─────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--kpi-color, var(--accent));
+      box-shadow: 0 0 16px var(--kpi-glow, var(--glow));
+    }
+
+    .kpi-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--kpi-color, var(--accent));
+      line-height: 1;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .kpi-sub {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 8px;
+    }
+
+    /* ── Section headers ───────────────────────────── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .section-head .icon {
+      font-size: 22px;
+    }
+
+    .section-head .sub {
+      font-size: 13px;
+      color: var(--text3);
+      font-weight: 400;
+      margin-left: auto;
+    }
+
+    /* ── Chart cards ───────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 340px 1fr;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .charts-grid2 {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart-wrap canvas {
+      max-height: 280px;
+    }
+
+    /* ── Tabs ───────────────────────────────────────── */
+    .tab-nav {
+      display: flex;
+      gap: 12px;
+      margin: 10px 0 24px 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .tab-link {
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text3);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-link:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-link.active {
+      color: var(--accent);
+      background: rgba(108, 143, 255, 0.08);
+      box-shadow: 0 4px 12px rgba(108, 143, 255, 0.1);
+    }
+
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .tab-pane.active {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── AI Narrative ──────────────────────────────── */
+    .ai-card {
+      background: linear-gradient(135deg, rgba(108, 143, 255, 0.06), rgba(167, 139, 250, 0.06));
+      border: 1px solid rgba(108, 143, 255, 0.25);
+      border-radius: var(--radius);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(167, 139, 250, 0.12);
+      color: var(--accent2);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .ai-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+      }
+    }
+
+    #ai-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text);
+      min-height: 80px;
+    }
+
+    #ai-text strong {
+      color: var(--accent);
+    }
+
+    #ai-text em {
+      color: var(--accent2);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    /* ── Fraud flags ───────────────────────────────── */
+    .fraud-card {
+      background: rgba(248, 113, 113, 0.05);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .fraud-count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      margin-left: auto;
+    }
+
+    .fraud-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .fraud-table th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--text3);
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(248, 113, 113, 0.15);
+    }
+
+    .fraud-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    .fraud-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .fraud-table tr:hover td {
+      background: rgba(248, 113, 113, 0.04);
+    }
+
+    .signal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .signal-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
+
+    .no-flags {
+      padding: 40px;
+      text-align: center;
+      color: var(--accent3);
+      font-size: 15px;
+    }
+
+    /* ── Outliers ──────────────────────────────────── */
+    .outlier-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .outlier-bar:last-child {
+      border-bottom: none;
+    }
+
+    .outlier-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .outlier-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent4), var(--danger));
+    }
+
+    .outlier-label {
+      font-size: 13px;
+      width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .outlier-amt {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent4);
+      width: 110px;
+      text-align: right;
+    }
+
+    .outlier-z {
+      font-size: 12px;
+      color: var(--text3);
+      width: 60px;
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Details table ─────────────────────────────── */
+    .details-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .details-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      padding: 9px 16px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+    }
+
+    .search-box::placeholder {
+      color: var(--text3);
+    }
+
+    .row-count {
+      font-size: 13px;
+      color: var(--text3);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .details-scroll {
+      overflow-x: auto;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .details-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .details-tbl th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--bg3);
+      color: var(--text3);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .details-tbl th:hover {
+      color: var(--accent);
+    }
+
+    .details-tbl td {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      white-space: nowrap;
+    }
+
+    .details-tbl tr:hover td {
+      background: rgba(108, 143, 255, 0.04);
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-approved {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--accent3);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+    }
+
+    .status-rejected {
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent4);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .status-other {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Claim Detail Overlay ─────────────────────── */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(4, 6, 12, 0.85);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 20px;
+    }
+
+    .detail-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .detail-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 1000px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      transform: scale(0.95) translateY(20px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .detail-overlay.active .detail-panel {
+      transform: scale(1) translateY(0);
+    }
+
+    .detail-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, rgba(108, 143, 255, 0.05), transparent);
+    }
+
+    .detail-title h2 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .detail-title p {
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .close-detail {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .close-detail:hover {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .detail-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+    }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .detail-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      font-weight: 600;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* ── 3D Body Visual ─────────────────────────────── */
+    .body-visual-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .body-3d-wrap {
+      width: 100%;
+      height: 360px;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: grab;
+      position: relative;
+      background: radial-gradient(ellipse at 50% 60%, rgba(108,143,255,0.06), transparent 70%);
+    }
+
+    .body-3d-wrap:active {
+      cursor: grabbing;
+    }
+
+    #body-3d-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .bodypart-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .organ-tooltip {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 5px 14px;
+      background: rgba(8, 12, 24, 0.85);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+      z-index: 5;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .organ-tooltip.visible {
+      opacity: 1;
+    }
+
+    .severity-legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+      color: var(--text3);
+      padding: 6px 0;
+    }
+
+    .severity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+      animation: severityPulse 2s ease-in-out infinite;
+    }
+
+    .severity-dot.mild { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.5); }
+    .severity-dot.moderate { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+    .severity-dot.critical { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+
+    @keyframes severityPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .clickable-row {
+      cursor: pointer;
+    }
+    .clickable-row:hover td {
+      background: rgba(108, 143, 255, 0.08) !important;
+    }
+    .clickable-name {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ── Toast ─────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 999;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.35s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    #toast.error {
+      background: rgba(248, 113, 113, 0.95);
+      color: #fff;
+    }
+
+    #toast.success {
+      background: rgba(52, 211, 153, 0.95);
+      color: #000;
+    }
+
+    /* ── Animations ────────────────────────────────── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .fade-up-1 {
+      animation-delay: 0.05s;
+    }
+
+    .fade-up-2 {
+      animation-delay: 0.10s;
+    }
+
+    .fade-up-3 {
+      animation-delay: 0.15s;
+    }
+
+    .fade-up-4 {
+      animation-delay: 0.20s;
+    }
+
+    .fade-up-5 {
+      animation-delay: 0.25s;
+    }
+
+    /* ── Responsive ────────────────────────────────── */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      main {
+        padding: 24px 16px 60px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════
+       LLM / Settings styles
+    ═══════════════════════════════════════════════ */
+
+    /* Settings cog button */
+    .settings-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .settings-btn:hover {
+      background: rgba(108, 143, 255, 0.12);
+      border-color: var(--accent);
+    }
+
+    .settings-btn.active {
+      background: rgba(108, 143, 255, 0.18);
+      border-color: var(--accent);
+    }
+
+    /* Settings drawer */
+    .settings-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 80px 20px 0;
+    }
+
+    .settings-overlay.open {
+      display: flex;
+    }
+
+    .settings-drawer {
+      width: 380px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: fadeUp 0.2s ease both;
+    }
+
+    .settings-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-label {
+      font-size: 12px;
+      color: var(--text3);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .settings-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .settings-input:focus {
+      border-color: var(--accent);
+    }
+
+    .settings-input::placeholder {
+      color: var(--text3);
+    }
+
+    .settings-hint {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 8px;
+    }
+
+    .ai-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(52, 211, 153, 0.08);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      color: var(--accent3);
+    }
+
+    .ai-status.no-key {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.2);
+      color: var(--accent4);
+    }
+
+    /* AI narrative panel upgrade */
+    .ai-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .ai-upgrade-btn {
+      margin-left: auto;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(108, 143, 255, 0.15));
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: var(--accent2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-upgrade-btn:hover {
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.3), rgba(108, 143, 255, 0.25));
+    }
+
+    .ai-upgrade-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ai-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(167, 139, 250, 0.3);
+      border-top-color: var(--accent2);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .ai-spinner.visible {
+      display: block;
+    }
+
+    /* Chat panel */
+    .chat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(108, 143, 255, 0.04), rgba(167, 139, 250, 0.04));
+    }
+
+    .chat-body {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 12px 18px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent);
+    }
+
+    .chat-input::placeholder {
+      color: var(--text3);
+    }
+
+    .chat-examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chat-example {
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      background: rgba(108, 143, 255, 0.07);
+      border: 1px solid rgba(108, 143, 255, 0.2);
+      color: var(--text2);
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .chat-example:hover {
+      background: rgba(108, 143, 255, 0.15);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    /* Chat response area */
+    .chat-response {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .chat-response.visible {
+      display: flex;
+    }
+
+    .chat-explanation {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      padding: 16px 20px;
+      background: rgba(108, 143, 255, 0.06);
+      border: 1px solid rgba(108, 143, 255, 0.15);
+      border-radius: 10px;
+    }
+
+    .chat-explanation strong {
+      color: var(--accent);
+    }
+
+    .code-block {
+      background: #050812;
+      border: 1px solid rgba(108, 143, 255, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(108, 143, 255, 0.15);
+      background: rgba(108, 143, 255, 0.05);
+    }
+
+    .code-lang {
+      font-size: 11px;
+      color: var(--text3);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text3);
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .code-block pre {
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #a5b4fc;
+      white-space: pre;
+    }
+
+    .result-wrap {
+      overflow-x: auto;
+    }
+
+    .result-wrap .llm-result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .result-wrap .llm-result-table th {
+      background: var(--bg3);
+      color: var(--text3);
+      padding: 8px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-wrap .llm-result-table td {
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .result-wrap .llm-result-table tr:hover td {
+      background: rgba(108, 143, 255, 0.04);
+    }
+
+    .llm-scalar {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 16px;
+    }
+
+    .chat-error {
+      font-size: 13px;
+      color: var(--danger);
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .chat-loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text3);
+      font-size: 14px;
+    }
+
+    /* Policy RAG panel */
+    .rag-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .rag-body {
+      padding: 24px 28px;
+    }
+
+    .pdf-drop {
+      border: 2px dashed rgba(167, 139, 250, 0.3);
+      border-radius: 10px;
+      padding: 36px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(167, 139, 250, 0.03);
+    }
+
+    .pdf-drop:hover,
+    .pdf-drop.dragover {
+      border-color: var(--accent2);
+      background: rgba(167, 139, 250, 0.08);
+      box-shadow: 0 0 30px rgba(167, 139, 250, 0.1);
+    }
+
+    .pdf-uploaded {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pdf-uploaded.visible {
+      display: flex;
+    }
+
+    .pdf-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(167, 139, 250, 0.08);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .pdf-info .chunks {
+      font-size: 12px;
+      color: var(--text3);
+      margin-left: auto;
+    }
+
+    .rag-response {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .rag-response.visible {
+      display: block;
+    }
+
+    .rag-answer {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text);
+      padding: 20px;
+      background: rgba(167, 139, 250, 0.06);
+      border: 1px solid rgba(167, 139, 250, 0.18);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .rag-answer strong {
+      color: var(--accent2);
+    }
+
+    .rag-sources {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rag-source {
+      font-size: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text3);
+    }
+
+    .rag-source .page-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent2);
+      background: rgba(167, 139, 250, 0.1);
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ Header ══════════════════════════════════════════════════════════════ -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <div>
+        <div class="logo-text">Claim<span>IQ</span></div>
+        <div class="logo-sub">Agentic AI Intelligence Platform</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="header-badge" id="ai-status-badge">● AI-Powered</div>
+      <button class="settings-btn" id="settings-cog" onclick="toggleSettings()" title="AI Settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ══ Settings Drawer ═══════════════════════════════════════════════════════ -->
+  <div class="settings-overlay" id="settings-overlay" onclick="closeSettingsIfOutside(event)">
+    <div class="settings-drawer" id="settings-drawer">
+      <div class="settings-title">⚙️ AI Settings · Gemini</div>
+      <div class="settings-label">Google AI Studio API Key (Free)</div>
+      <input type="password" class="settings-input" id="api-key-input" placeholder="AIza…" oninput="saveApiKey()"
+        autocomplete="off" />
+      <div class="settings-hint">Get a free key at <strong>aistudio.google.com</strong> · Stored in your browser only ·
+        Never sent to our server</div>
+      <div id="key-status" class="ai-status no-key" style="margin-top:16px">⚠️ No API key — using template narrative
+      </div>
+      <div style="margin-top:20px;display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1;padding:10px" onclick="closeSettings()">Done</button>
+        <button class="btn btn-secondary" style="padding:10px 16px" onclick="clearApiKey()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Main ════════════════════════════════════════════════════════════════ -->
+  <main>
+
+    <!-- ── Upload section ─────────────────────────────────────────────────── -->
+    <section id="upload-section">
+      <h1 class="hero-title">Intelligent Claim<br />Analysis, Instantly</h1>
+      <p class="hero-sub">Upload any Excel claim file and get AI-powered KPIs, fraud signals, outlier detection, and
+        executive narratives in seconds.</p>
+
+      <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <span class="upload-icon">📊</span>
+        <div class="upload-label">Drop your Excel file here or <span>browse</span></div>
+        <div class="upload-hint">.xlsx · .xlsb · .xls · up to 50 MB</div>
+        <input type="file" id="file-input" accept=".xlsx,.xlsb,.xls" />
+      </div>
+
+      <div class="divider">or</div>
+      <button class="btn btn-primary" id="sample-btn" onclick="loadSampleFiles()">
+        ⚡ Analyze Sample Claim Files
+      </button>
+
+      <div class="feature-pills">
+        <span class="pill">✦ KPI Dashboard</span>
+        <span class="pill">✦ Fraud Detection</span>
+        <span class="pill">✦ Outlier Alerts</span>
+        <span class="pill">✦ Monthly Trends</span>
+        <span class="pill">✦ Hospital Analytics</span>
+        <span class="pill">✦ AI Narrative</span>
+        <span class="pill">✦ Disease Breakdown</span>
+      </div>
+    </section>
+
+    <!-- ── Loading ─────────────────────────────────────────────────────────── -->
+    <section id="loading">
+      <div class="spinner"></div>
+      <div class="loading-steps">
+        <div class="loading-step active" id="step-1">📥 Reading Excel file…</div>
+        <div class="loading-step" id="step-2">🔍 Profiling columns & schema…</div>
+        <div class="loading-step" id="step-3">📊 Computing KPIs & trends…</div>
+        <div class="loading-step" id="step-4">🚨 Running fraud & outlier detection…</div>
+        <div class="loading-step" id="step-5">🧠 Generating AI narrative…</div>
+      </div>
+    </section>
+
+    <!-- ── Dashboard ───────────────────────────────────────────────────────── -->
+    <section id="dashboard">
+
+      <!-- Header -->
+      <div class="dash-header fade-up">
+        <div class="file-badge">
+          <span class="file-icon">📋</span>
+          <div>
+            <div class="file-name" id="dash-filename">Claim Report</div>
+            <div class="file-meta" id="dash-meta">Loading…</div>
+          </div>
+        </div>
+        <div class="file-switcher" id="file-switcher"></div>
+        <button class="btn btn-secondary" onclick="resetDashboard()">↑ New Upload</button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-nav fade-up fade-up-1">
+        <div class="tab-link active" onclick="switchTab('tab-overview')">📊 Overview</div>
+        <div class="tab-link" onclick="switchTab('tab-chat')">💬 Data Chat</div>
+        <div class="tab-link" onclick="switchTab('tab-policy')">📄 Policy AI</div>
+      </div>
+
+      <!-- Overview Tab -->
+      <div id="tab-overview" class="tab-pane active">
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+      <!-- AI Narrative -->
+      <div class="ai-card fade-up fade-up-2">
+        <div class="ai-card-header">
+          <div class="ai-badge"><span class="ai-pulse"></span> AI Executive Summary</div>
+          <button class="ai-upgrade-btn" id="llm-narrative-btn" onclick="generateLLMNarrative()">
+            <span class="ai-spinner" id="narr-spinner"></span>
+            ✨ Generate with Gemini
+          </button>
+        </div>
+        <div id="ai-text">Generating narrative…</div>
+      </div>
+
+      <!-- Charts Row 1: donut + hospitals -->
+      <div class="charts-grid2 fade-up fade-up-3">
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">🍩</span> Claim Type Split</div>
+          <div class="chart-wrap"><canvas id="chart-type"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">🏥</span> Top Hospitals by Amount</div>
+          <div class="chart-wrap"><canvas id="chart-hospital"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: trend + disease -->
+      <div class="charts-grid2 fade-up fade-up-4">
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">📈</span> Monthly Claim Trend</div>
+          <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">🦠</span> Disease Category Breakdown</div>
+          <div class="chart-wrap"><canvas id="chart-disease"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 3: status + age/gender -->
+      <div class="charts-grid2 fade-up fade-up-5">
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">✅</span> Claim Status Distribution</div>
+          <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">🏥</span> IPD vs Day Care Breakdown</div>
+          <div class="chart-wrap"><canvas id="chart-ipd-dc"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 4: age + relation -->
+      <div class="charts-grid2 fade-up">
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">👶</span> Age Group Distribution</div>
+          <div class="chart-wrap"><canvas id="chart-age"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="section-head"><span class="icon">👨‍👩‍👧‍👦</span> Member Relation Distribution</div>
+          <div class="chart-wrap"><canvas id="chart-relation"></canvas></div>
+        </div>
+      </div>
+
+      <!-- High-value Claims -->
+      <div class="chart-card fade-up">
+        <div class="section-head">
+          <span class="icon">💎</span> High-Value Claims
+          <span class="sub">Claims > ₹2,00,000</span>
+        </div>
+        <div id="high-value-body"></div>
+      </div>
+
+      <!-- Fraud Flags -->
+      <div class="fraud-card fade-up">
+        <div class="section-head">
+          <span class="icon">⚠️</span> Fraud & Anomaly Signals
+          <span class="fraud-count-badge" id="fraud-count">0 flags</span>
+        </div>
+        <div id="fraud-body"></div>
+      </div>
+
+      <!-- Outliers & City breakdown -->
+      <div class="charts-grid2 fade-up">
+        <div class="chart-card">
+          <div class="section-head">
+            <span class="icon">📡</span> High-Cost Outliers
+            <span class="sub" id="outlier-sub">Z-score &gt; 2.5</span>
+          </div>
+          <div id="outlier-body"></div>
+        </div>
+        <div class="chart-card">
+          <div class="section-head">
+            <span class="icon">🌆</span> Top Cities by Claims
+          </div>
+          <div id="city-body"></div>
+        </div>
+      </div>
+
+      <!-- Details Table -->
+      <div class="details-card fade-up">
+        <div class="details-toolbar">
+          <span style="font-size:17px;font-weight:700">📑 Claim Details</span>
+          <input type="text" class="search-box" id="search-box" placeholder="Search claims…" oninput="filterTable()" />
+          <span class="row-count" id="row-count"></span>
+        </div>
+        <div class="details-scroll">
+          <table class="details-tbl" id="details-tbl">
+            <thead id="details-thead"></thead>
+            <tbody id="details-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- End Overview Tab -->
+
+    <!-- Data Chat Tab -->
+    <div id="tab-chat" class="tab-pane">
+      <!-- ══ Chat Panel ════════════════════════════════════════════════════════ -->
+      <div class="chat-card">
+        <div class="chat-header">
+          <div class="section-head" style="margin-bottom:4px">
+            <span class="icon">💬</span> Ask Your Data
+            <span class="sub">Powered by Gemini 1.5 Flash · Natural language → Pandas</span>
+          </div>
+          <p style="font-size:13px;color:var(--text3);margin-top:4px">Ask any question about the loaded claims data in
+            plain English.</p>
+        </div>
+        <div class="chat-body">
+          <div>
+            <div class="chat-input-row">
+              <input type="text" class="chat-input" id="chat-input"
+                placeholder="e.g. Which hospitals have the highest rejection rate?"
+                onkeydown="if(event.key==='Enter') sendChat()" />
+              <button class="btn btn-primary" onclick="sendChat()" id="chat-send-btn" style="padding:12px 22px">Ask
+                →</button>
+            </div>
+            <div class="chat-examples" style="margin-top:12px">
+              <span class="chat-example" onclick="prefill('Which hospitals have the highest incurred amount?')">🏥
+                Highest incurred hospital</span>
+              <span class="chat-example" onclick="prefill('Show top 10 claims by billed amount')">💰 Top 10 by
+                amount</span>
+              <span class="chat-example" onclick="prefill('What is the rejection rate by claim type?')">❌ Rejection by
+                type</span>
+              <span class="chat-example" onclick="prefill('Show monthly trend of total incurred amount')">📈 Monthly
+                trend</span>
+              <span class="chat-example"
+                onclick="prefill('Which disease categories have the highest average claim?')">🦠 Disease avg
+                claim</span>
+              <span class="chat-example" onclick="prefill('List all cashless claims above 1 lakh sorted by amount')">🔺
+                High cashless claims</span>
+            </div>
+          </div>
+
+          <div class="chat-response" id="chat-response">
+            <div class="chat-loading" id="chat-loading" style="display:none">
+              <div class="spinner" style="width:24px;height:24px;border-width:2px"></div>
+              <span>Gemini 1.5 Flash is writing code…</span>
+            </div>
+            <div class="chat-error" id="chat-error" style="display:none"></div>
+            <div id="chat-explanation" class="chat-explanation" style="display:none"></div>
+            <div class="code-block" id="chat-code-block" style="display:none">
+              <div class="code-header">
+                <span class="code-lang">python · pandas</span>
+                <button class="copy-btn" onclick="copyCode()">Copy</button>
+              </div>
+              <pre id="chat-code-pre"></pre>
+            </div>
+            <div class="result-wrap" id="chat-result" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- End Chat Tab -->
+
+    <!-- Policy AI Tab -->
+    <div id="tab-policy" class="tab-pane">
+      <!-- ══ Policy RAG Panel ══════════════════════════════════════════════════ -->
+      <div class="rag-card fade-up">
+        <div class="chat-header">
+          <div class="section-head" style="margin-bottom:4px">
+            <span class="icon">📄</span> Policy Document Q&amp;A
+            <span class="sub">Upload PDF · RAG + Gemini · Clause-level answers</span>
+          </div>
+          <p style="font-size:13px;color:var(--text3);margin-top:4px">Upload an insurance policy PDF and ask questions
+            about coverage, exclusions, co-pay, or rejection reasons.</p>
+        </div>
+        <div class="rag-body">
+          <!-- PDF upload zone -->
+          <div class="pdf-drop" id="pdf-drop" onclick="document.getElementById('pdf-input').click()"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')" ondrop="handlePdfDrop(event)">
+            <div style="font-size:40px;margin-bottom:12px">📄</div>
+            <div style="font-size:16px;font-weight:600;color:var(--text)">Drop policy PDF here or <span
+                style="color:var(--accent2)">browse</span></div>
+            <div style="font-size:12px;color:var(--text3);margin-top:6px">Group mediclaim policies, endorsements, policy
+              wording documents</div>
+            <input type="file" id="pdf-input" accept=".pdf" style="display:none" onchange="uploadPDF(this.files[0])" />
+          </div>
+
+          <!-- After upload -->
+          <div class="pdf-uploaded" id="pdf-uploaded">
+            <div class="pdf-info">
+              <span style="font-size:22px">✅</span>
+              <div>
+                <div style="font-weight:600;font-size:14px" id="pdf-filename">policy.pdf</div>
+                <div style="font-size:12px;color:var(--text3)">Policy document indexed and ready</div>
+              </div>
+              <span class="chunks" id="pdf-chunks"></span>
+              <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px"
+                onclick="resetPDF()">Remove</button>
+            </div>
+
+            <div class="chat-input-row">
+              <input type="text" class="chat-input" id="rag-input"
+                placeholder="e.g. What is the co-pay clause? What are the sub-limits?"
+                onkeydown="if(event.key==='Enter') sendRAG()" />
+              <button class="btn btn-primary" onclick="sendRAG()" id="rag-send-btn" style="padding:12px 22px">Ask
+                →</button>
+            </div>
+
+            <!-- Example questions -->
+            <div class="chat-examples">
+              <span class="chat-example" onclick="prefillRAG('What is the room rent sub-limit?')">🛏 Room rent
+                limit</span>
+              <span class="chat-example" onclick="prefillRAG('What are the exclusions under this policy?')">🚫
+                Exclusions</span>
+              <span class="chat-example" onclick="prefillRAG('Explain the co-pay clause')">💳 Co-pay clause</span>
+              <span class="chat-example" onclick="prefillRAG('What is the waiting period for pre-existing diseases?')">⏳
+                Waiting period</span>
+            </div>
+
+            <div class="rag-response" id="rag-response">
+              <div class="chat-loading" id="rag-loading" style="display:none">
+                <div class="spinner" style="width:24px;height:24px;border-width:2px"></div>
+                <span>Searching policy document…</span>
+              </div>
+              <div class="rag-answer" id="rag-answer" style="display:none"></div>
+              <div class="rag-sources" id="rag-sources"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- End Policy Tab -->
+
+    </section>
+  </main>
+
+  <!-- ── Toast ─────────────────────────────────────────────────────────────── -->
+  <!-- Claim Detail Overlay -->
+  <div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+    <div class="detail-panel" onclick="event.stopPropagation()">
+      <div class="detail-header">
+        <div class="detail-title">
+          <h2 id="detail-name">Clamant Name</h2>
+          <p id="detail-id">Claim ID: OC-123456</p>
+        </div>
+        <button class="close-detail" onclick="closeDetail()">&times;</button>
+      </div>
+      <div class="detail-content">
+        <div class="detail-main">
+          <div class="detail-info-grid" id="detail-info-grid">
+            <!-- Dynamic items -->
+          </div>
+        </div>
+        <div class="detail-sidebar">
+          <div class="body-visual-container">
+            <div class="bodypart-label" id="bodypart-label">General Health</div>
+            <div class="body-3d-wrap">
+              <canvas id="body-3d-canvas"></canvas>
+              <div class="organ-tooltip" id="organ-tooltip"></div>
+            </div>
+            <div class="severity-legend">
+              <span><span class="severity-dot mild"></span>Mild</span>
+              <span><span class="severity-dot moderate"></span>Moderate</span>
+              <span><span class="severity-dot critical"></span>Critical</span>
+            </div>
+            <p style="font-size:11px;color:var(--text3);text-align:center">Interactive 3D — drag to rotate. Affected organ highlighted by diagnosis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    /* ════════════════════════════════════════════════════
+       3D Body Viewer (Three.js)
+    ═══════════════════════════════════════════════════════ */
+    class BodyViewer3D {
+      constructor(canvasEl) {
+        this.canvas = canvasEl;
+        this.parts = {};
+        this.highlightedParts = [];
+        this.animId = null;
+        this.isDragging = false;
+        this.prevMouse = { x: 0, y: 0 };
+        this.targetRotY = 0;
+        this.currentRotY = 0;
+        this.autoRotate = true;
+        this.glowClock = 0;
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.bodyGroup = null;
+        this._init();
+      }
+
+      _init() {
+        const w = this.canvas.parentElement.clientWidth;
+        const h = this.canvas.parentElement.clientHeight;
+
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 100);
+        this.camera.position.set(0, 0.2, 5.5);
+        this.camera.lookAt(0, 0.2, 0);
+
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
+        this.renderer.setSize(w, h);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setClearColor(0x000000, 0);
+
+        // Lighting
+        const ambient = new THREE.AmbientLight(0x6c8fff, 0.35);
+        this.scene.add(ambient);
+        const dirLight = new THREE.DirectionalLight(0xeef0ff, 0.9);
+        dirLight.position.set(3, 5, 4);
+        this.scene.add(dirLight);
+        const backLight = new THREE.DirectionalLight(0xa78bfa, 0.3);
+        backLight.position.set(-2, -1, -3);
+        this.scene.add(backLight);
+        const rimLight = new THREE.PointLight(0x6c8fff, 0.4, 10);
+        rimLight.position.set(0, 3, -3);
+        this.scene.add(rimLight);
+
+        this.bodyGroup = new THREE.Group();
+        this.scene.add(this.bodyGroup);
+        this._buildBody();
+        this._bindMouse();
+        this._animate();
+
+        // Resize
+        const ro = new ResizeObserver(() => {
+          const pw = this.canvas.parentElement.clientWidth;
+          const ph = this.canvas.parentElement.clientHeight;
+          this.camera.aspect = pw / ph;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(pw, ph);
+        });
+        ro.observe(this.canvas.parentElement);
+      }
+
+      _mat(color = 0x1e293b) {
+        return new THREE.MeshStandardMaterial({
+          color, transparent: true, opacity: 0.55,
+          roughness: 0.5, metalness: 0.2,
+        });
+      }
+
+      _organMat(color = 0x334155) {
+        return new THREE.MeshStandardMaterial({
+          color, transparent: true, opacity: 0.7,
+          roughness: 0.4, metalness: 0.3,
+          emissive: 0x000000, emissiveIntensity: 0,
+        });
+      }
+
+      _addPart(name, mesh) {
+        this.parts[name] = mesh;
+        this.bodyGroup.add(mesh);
+      }
+
+      _buildBody() {
+        // ── Head ──
+        const headGeo = new THREE.SphereGeometry(0.32, 24, 20);
+        const headMesh = new THREE.Mesh(headGeo, this._mat(0x2a3555));
+        headMesh.position.set(0, 2.0, 0);
+        this._addPart('head', headMesh);
+
+        // ── Neck ──
+        const neckGeo = new THREE.CylinderGeometry(0.09, 0.1, 0.2, 12);
+        const neckMesh = new THREE.Mesh(neckGeo, this._mat(0x253050));
+        neckMesh.position.set(0, 1.62, 0);
+        this._addPart('neck', neckMesh);
+
+        // ── Torso (upper + lower) ──
+        const torsoGeo = new THREE.CylinderGeometry(0.38, 0.32, 1.0, 16);
+        const torsoMesh = new THREE.Mesh(torsoGeo, this._mat(0x1e293b));
+        torsoMesh.position.set(0, 1.0, 0);
+        this._addPart('torso', torsoMesh);
+
+        // ── Stomach (lower abdomen) ──
+        const stomachGeo = new THREE.SphereGeometry(0.28, 16, 12);
+        const stomachMesh = new THREE.Mesh(stomachGeo, this._organMat(0x2d4a3a));
+        stomachMesh.position.set(0, 0.7, 0.08);
+        stomachMesh.scale.set(1, 0.8, 0.7);
+        this._addPart('stomach', stomachMesh);
+
+        // ── Heart ──
+        const heartGeo = new THREE.SphereGeometry(0.1, 16, 12);
+        const heartMesh = new THREE.Mesh(heartGeo, this._organMat(0x8b3a3a));
+        heartMesh.position.set(0.06, 1.25, 0.15);
+        heartMesh.scale.set(1, 1.1, 0.85);
+        this._addPart('heart', heartMesh);
+
+        // ── Lungs (left + right) ──
+        const lungGeo = new THREE.SphereGeometry(0.15, 16, 12);
+        const lungL = new THREE.Mesh(lungGeo, this._organMat(0x3a4a6b));
+        lungL.position.set(-0.18, 1.2, 0.05);
+        lungL.scale.set(0.8, 1.2, 0.6);
+        const lungR = new THREE.Mesh(lungGeo.clone(), this._organMat(0x3a4a6b));
+        lungR.position.set(0.18, 1.2, 0.05);
+        lungR.scale.set(0.8, 1.2, 0.6);
+        const lungsGroup = new THREE.Group();
+        lungsGroup.add(lungL); lungsGroup.add(lungR);
+        this._addPart('lungs', lungsGroup);
+
+        // ── Kidneys ──
+        const kidneyGeo = new THREE.SphereGeometry(0.07, 12, 10);
+        const kidneyL = new THREE.Mesh(kidneyGeo, this._organMat(0x6b3a3a));
+        kidneyL.position.set(-0.2, 0.85, -0.05);
+        kidneyL.scale.set(0.7, 1, 0.7);
+        const kidneyR = new THREE.Mesh(kidneyGeo.clone(), this._organMat(0x6b3a3a));
+        kidneyR.position.set(0.2, 0.85, -0.05);
+        kidneyR.scale.set(0.7, 1, 0.7);
+        const kidneysGroup = new THREE.Group();
+        kidneysGroup.add(kidneyL); kidneysGroup.add(kidneyR);
+        this._addPart('kidneys', kidneysGroup);
+
+        // ── Pelvis ──
+        const pelvisGeo = new THREE.SphereGeometry(0.3, 16, 10);
+        const pelvisMesh = new THREE.Mesh(pelvisGeo, this._mat(0x1e293b));
+        pelvisMesh.position.set(0, 0.4, 0);
+        pelvisMesh.scale.set(1.1, 0.4, 0.7);
+        this._addPart('pelvis', pelvisMesh);
+
+        // ── Arms ──
+        const armGeo = new THREE.CylinderGeometry(0.06, 0.05, 0.9, 10);
+        const armL = new THREE.Mesh(armGeo, this._mat(0x253050));
+        armL.position.set(-0.52, 1.05, 0);
+        armL.rotation.z = 0.15;
+        const armR = new THREE.Mesh(armGeo.clone(), this._mat(0x253050));
+        armR.position.set(0.52, 1.05, 0);
+        armR.rotation.z = -0.15;
+        const armsGroup = new THREE.Group();
+        armsGroup.add(armL); armsGroup.add(armR);
+
+        // forearms
+        const foreGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.8, 10);
+        const foreL = new THREE.Mesh(foreGeo, this._mat(0x253050));
+        foreL.position.set(-0.56, 0.2, 0.05);
+        foreL.rotation.z = 0.08;
+        const foreR = new THREE.Mesh(foreGeo.clone(), this._mat(0x253050));
+        foreR.position.set(0.56, 0.2, 0.05);
+        foreR.rotation.z = -0.08;
+        armsGroup.add(foreL); armsGroup.add(foreR);
+        this._addPart('limbs-arm', armsGroup);
+
+        // ── Legs ──
+        const legGeo = new THREE.CylinderGeometry(0.09, 0.065, 1.1, 12);
+        const legL = new THREE.Mesh(legGeo, this._mat(0x1a2540));
+        legL.position.set(-0.17, -0.3, 0);
+        const legR = new THREE.Mesh(legGeo.clone(), this._mat(0x1a2540));
+        legR.position.set(0.17, -0.3, 0);
+        const legsGroup = new THREE.Group();
+        legsGroup.add(legL); legsGroup.add(legR);
+
+        // calves
+        const calfGeo = new THREE.CylinderGeometry(0.065, 0.05, 1.0, 12);
+        const calfL = new THREE.Mesh(calfGeo, this._mat(0x1a2540));
+        calfL.position.set(-0.17, -1.3, 0.03);
+        const calfR = new THREE.Mesh(calfGeo.clone(), this._mat(0x1a2540));
+        calfR.position.set(0.17, -1.3, 0.03);
+        legsGroup.add(calfL); legsGroup.add(calfR);
+        this._addPart('limbs-leg', legsGroup);
+
+        // ── Vessels (subtle lines through torso) ──
+        const vesselMat = new THREE.LineBasicMaterial({ color: 0x4a6080, transparent: true, opacity: 0.3 });
+        const vesselGeo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 1.55, 0.05),
+          new THREE.Vector3(0.05, 1.3, 0.1),
+          new THREE.Vector3(0, 0.9, 0.08),
+          new THREE.Vector3(-0.05, 0.5, 0.05),
+        ]);
+        const vesselLine = new THREE.Line(vesselGeo, vesselMat);
+        this._addPart('vessels', vesselLine);
+
+        // ── Bones (visible as subtle wireframe spine) ──
+        const spineMat = new THREE.LineBasicMaterial({ color: 0x5a6a80, transparent: true, opacity: 0.25 });
+        const spinePoints = [];
+        for (let i = 0; i <= 10; i++) {
+          spinePoints.push(new THREE.Vector3(0, 1.55 - i * 0.12, -0.08 - Math.sin(i * 0.3) * 0.02));
+        }
+        const spineGeo = new THREE.BufferGeometry().setFromPoints(spinePoints);
+        const spineLine = new THREE.Line(spineGeo, spineMat);
+        this._addPart('bones', spineLine);
+
+        // Center model
+        this.bodyGroup.position.y = -0.6;
+      }
+
+      _bindMouse() {
+        const el = this.canvas;
+        el.addEventListener('mousedown', (e) => {
+          this.isDragging = true;
+          this.autoRotate = false;
+          this.prevMouse.x = e.clientX;
+        });
+        el.addEventListener('mousemove', (e) => {
+          if (!this.isDragging) return;
+          const dx = e.clientX - this.prevMouse.x;
+          this.targetRotY += dx * 0.008;
+          this.prevMouse.x = e.clientX;
+        });
+        el.addEventListener('mouseup', () => {
+          this.isDragging = false;
+          setTimeout(() => { this.autoRotate = true; }, 3000);
+        });
+        el.addEventListener('mouseleave', () => { this.isDragging = false; });
+
+        // Touch
+        el.addEventListener('touchstart', (e) => {
+          this.isDragging = true;
+          this.autoRotate = false;
+          this.prevMouse.x = e.touches[0].clientX;
+        }, { passive: true });
+        el.addEventListener('touchmove', (e) => {
+          if (!this.isDragging) return;
+          const dx = e.touches[0].clientX - this.prevMouse.x;
+          this.targetRotY += dx * 0.008;
+          this.prevMouse.x = e.touches[0].clientX;
+        }, { passive: true });
+        el.addEventListener('touchend', () => {
+          this.isDragging = false;
+          setTimeout(() => { this.autoRotate = true; }, 3000);
+        });
+      }
+
+      _setEmissive(obj, color, intensity) {
+        if (obj.isMesh && obj.material) {
+          obj.material.emissive = new THREE.Color(color);
+          obj.material.emissiveIntensity = intensity;
+          obj.material.opacity = intensity > 0 ? 0.95 : 0.55;
+          obj.material.needsUpdate = true;
+        }
+        if (obj.isLine && obj.material) {
+          obj.material.color = new THREE.Color(intensity > 0 ? color : 0x4a6080);
+          obj.material.opacity = intensity > 0 ? 1 : 0.3;
+          obj.material.needsUpdate = true;
+        }
+        if (obj.children) obj.children.forEach(c => this._setEmissive(c, color, intensity));
+      }
+
+      highlight(partName, severity = 'moderate') {
+        this.reset();
+        const colorMap = {
+          mild: 0x34d399,
+          moderate: 0xf59e0b,
+          critical: 0xf87171,
+        };
+        const hColor = colorMap[severity] || colorMap.moderate;
+
+        // Map body_part value to mesh key(s)
+        const mapping = {
+          head: ['head'],
+          heart: ['heart'],
+          lungs: ['lungs'],
+          stomach: ['stomach'],
+          kidneys: ['kidneys'],
+          pelvis: ['pelvis'],
+          bones: ['bones'],
+          vessels: ['vessels'],
+          limbs: ['limbs-arm', 'limbs-leg'],
+          skin: ['torso', 'head'],
+          body: ['torso'],
+          lymph: ['torso', 'head'],
+        };
+
+        const keys = mapping[partName] || ['torso'];
+        keys.forEach(k => {
+          const part = this.parts[k];
+          if (part) {
+            this._setEmissive(part, hColor, 1.2);
+            this.highlightedParts.push(k);
+          }
+        });
+
+        // Show tooltip
+        const tooltip = document.getElementById('organ-tooltip');
+        if (tooltip) {
+          tooltip.textContent = partName.replace('-', ' ') + (severity !== 'moderate' ? ' (' + severity + ')' : '');
+          tooltip.classList.add('visible');
+        }
+      }
+
+      reset() {
+        this.highlightedParts.forEach(k => {
+          const part = this.parts[k];
+          if (part) this._setEmissive(part, 0x000000, 0);
+        });
+        this.highlightedParts = [];
+        this.glowClock = 0;
+        const tooltip = document.getElementById('organ-tooltip');
+        if (tooltip) tooltip.classList.remove('visible');
+      }
+
+      _animate() {
+        this.animId = requestAnimationFrame(() => this._animate());
+
+        // Auto-rotate
+        if (this.autoRotate) {
+          this.targetRotY += 0.004;
+        }
+        this.currentRotY += (this.targetRotY - this.currentRotY) * 0.08;
+        this.bodyGroup.rotation.y = this.currentRotY;
+
+        // Pulsing glow on highlighted parts
+        if (this.highlightedParts.length > 0) {
+          this.glowClock += 0.03;
+          const pulse = 0.7 + Math.sin(this.glowClock) * 0.5;
+          this.highlightedParts.forEach(k => {
+            const part = this.parts[k];
+            if (part) {
+              const setIntensity = (obj) => {
+                if (obj.isMesh && obj.material) {
+                  obj.material.emissiveIntensity = pulse;
+                }
+                if (obj.children) obj.children.forEach(c => setIntensity(c));
+              };
+              setIntensity(part);
+            }
+          });
+        }
+
+        this.renderer.render(this.scene, this.camera);
+      }
+
+      dispose() {
+        if (this.animId) cancelAnimationFrame(this.animId);
+        this.renderer.dispose();
+      }
+    }
+
+    let bodyViewer = null;
+
+    /* ════════════════════════════════════════════════════
+       State
+    ═══════════════════════════════════════════════════════ */
+    let allFiles = [];
+    let activeIndex = 0;
+    let chartInstances = {};
+    let currentDetails = [];
+    let allRows = [];
+    let currentData = null;    // active file's full analysis JSON
+    let ragStoreId = null;    // active PDF store_id
+    let currentCode = '';      // last generated Pandas code
+
+    /* ════════════════════════════════════════════════════
+       API Key helpers
+    ═══════════════════════════════════════════════════════ */
+    function getApiKey() { return localStorage.getItem('claimiq_api_key') || ''; }
+    function saveApiKey() {
+      const k = document.getElementById('api-key-input').value.trim();
+      localStorage.setItem('claimiq_api_key', k);
+      updateKeyStatus();
+    }
+    function clearApiKey() {
+      localStorage.removeItem('claimiq_api_key');
+      document.getElementById('api-key-input').value = '';
+      updateKeyStatus();
+    }
+    function updateKeyStatus() {
+      const k = getApiKey();
+      const el = document.getElementById('key-status');
+      const badge = document.getElementById('ai-status-badge');
+      if (k && k.startsWith('AIza')) {
+        el.className = 'ai-status';
+        el.textContent = '✅ API key set — Gemini 1.5 Flash enabled';
+        badge.textContent = '● Gemini Active';
+        badge.style.background = 'rgba(52,211,153,0.12)';
+        badge.style.color = 'var(--accent3)';
+        badge.style.borderColor = 'rgba(52,211,153,0.25)';
+      } else {
+        el.className = 'ai-status no-key';
+        el.textContent = '⚠️ No API key — using template narrative';
+        badge.textContent = '● AI-Powered';
+        badge.style = '';
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-link').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+
+      const link = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+      const pane = document.getElementById(tabId);
+      if (link) link.classList.add('active');
+      if (pane) pane.classList.add('active');
+    }
+
+    /* Settings drawer */
+    function toggleSettings() {
+      const ov = document.getElementById('settings-overlay');
+      const btn = document.getElementById('settings-cog');
+      const isOpen = ov.classList.contains('open');
+      if (isOpen) { ov.classList.remove('open'); btn.classList.remove('active'); }
+      else {
+        ov.classList.add('open'); btn.classList.add('active');
+        document.getElementById('api-key-input').value = getApiKey();
+        updateKeyStatus();
+      }
+    }
+    function closeSettings() {
+      document.getElementById('settings-overlay').classList.remove('open');
+      document.getElementById('settings-cog').classList.remove('active');
+    }
+    function closeSettingsIfOutside(e) {
+      if (e.target === document.getElementById('settings-overlay')) closeSettings();
+    }
+
+    // Init
+    updateKeyStatus();
+
+    /* ════════════════════════════════════════════════════
+       Drag & drop
+    ═══════════════════════════════════════════════════════ */
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => { if (fileInput.files.length) uploadFile(fileInput.files[0]); });
+
+    /* ════════════════════════════════════════════════════
+       Upload
+    ═══════════════════════════════════════════════════════ */
+    async function uploadFile(file) {
+      showLoading();
+      animateSteps();
+      const form = new FormData();
+      form.append('file', file);
+      try {
+        const res = await fetch('/api/analyze', { method: 'POST', body: form });
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); hideLoading(); return; }
+        allFiles = [data];
+        activeIndex = 0;
+        buildDashboard([data]);
+      } catch (e) {
+        showToast('Analysis failed: ' + e.message, 'error');
+        hideLoading();
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+       Sample files
+    ═══════════════════════════════════════════════════════ */
+    async function loadSampleFiles() {
+      document.getElementById('sample-btn').disabled = true;
+      showLoading();
+      animateSteps();
+      try {
+        const res = await fetch('/api/sample');
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); hideLoading(); return; }
+        allFiles = data.files.filter(f => !f.error);
+        if (!allFiles.length) { showToast('No sample files could be analyzed', 'error'); hideLoading(); return; }
+        activeIndex = 0;
+        buildDashboard(allFiles);
+      } catch (e) {
+        showToast('Failed: ' + e.message, 'error');
+        hideLoading();
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+       Build dashboard
+    ═══════════════════════════════════════════════════════ */
+    function buildDashboard(files) {
+      hideLoading();
+      document.getElementById('upload-section').classList.add('hidden');
+      const dash = document.getElementById('dashboard');
+      dash.classList.add('visible');
+
+      // File switcher
+      const switcher = document.getElementById('file-switcher');
+      switcher.innerHTML = '';
+      if (files.length > 1) {
+        files.forEach((f, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'file-tab' + (i === activeIndex ? ' active' : '');
+          btn.textContent = truncate(f.file, 28);
+          btn.onclick = () => { activeIndex = i; renderFile(files[i]); updateSwitcherActive(i); };
+          switcher.appendChild(btn);
+        });
+      }
+
+      renderFile(files[activeIndex]);
+    }
+
+    function updateSwitcherActive(i) {
+      document.querySelectorAll('.file-tab').forEach((t, idx) => {
+        t.classList.toggle('active', idx === i);
+      });
+    }
+
+    function renderFile(data) {
+      currentData = data;
+      currentDetails = data.details || [];
+      document.getElementById('dash-filename').textContent = data.file || 'Claim Report';
+      const k = data.kpis || {};
+      document.getElementById('dash-meta').textContent =
+        `${fmt(k.total_claims)} claims · ₹${fmtAmt(k.total_incurred)} incurred · ${k.approval_rate}% approved`;
+
+      renderKPIs(k, (data.fraud_flags || []).length, (data.outliers || []).length);
+      typeNarrative(data.ai_narrative || '');
+      renderCharts(data);
+      renderFraud(data.fraud_flags || []);
+      renderHighValue(data.high_value_claims || []);
+      renderOutliers(data.outliers || []);
+      renderCities(data.city_breakdown || []);
+      renderDetails(currentDetails);
+    }
+
+    /* ════════════════════════════════════════════════════
+       KPI cards
+    ═══════════════════════════════════════════════════════ */
+    const KPI_DEFS = [
+      {
+        key: 'total_claims', label: 'Total Claims', icon: '📋', color: '#6c8fff', glow: 'rgba(108,143,255,0.2)',
+        fmt: v => fmt(v)
+      },
+      {
+        key: 'total_incurred', label: 'Total Incurred', icon: '💰', color: '#a78bfa', glow: 'rgba(167,139,250,0.2)',
+        fmt: v => '₹' + fmtAmt(v), sub: v => v > 1e7 ? '₹' + (v / 1e7).toFixed(2) + ' Cr' : ''
+      },
+      {
+        key: 'avg_claim', label: 'Avg Claim Amount', icon: '⚖️', color: '#34d399', glow: 'rgba(52,211,153,0.2)',
+        fmt: v => '₹' + fmt(Math.round(v))
+      },
+      {
+        key: 'cashless_pct', label: 'Cashless %', icon: '🏦', color: '#38bdf8', glow: 'rgba(56,189,248,0.2)',
+        fmt: v => v + '%', sub: (v, k) => `${fmt(k.cashless_count)} cashless · ${fmt(k.reimb_count)} reimb`
+      },
+      {
+        key: 'approval_rate', label: 'Approval Rate', icon: '✅', color: '#34d399', glow: 'rgba(52,211,153,0.2)',
+        fmt: v => v + '%', sub: (v, k) => `${fmt(k.approved_count)} approved · ${fmt(k.rejected_count)} rejected`
+      },
+      {
+        key: 'max_claim', label: 'Highest Single Claim', icon: '🔺', color: '#f59e0b', glow: 'rgba(245,158,11,0.2)',
+        fmt: v => '₹' + fmtAmt(v)
+      },
+    ];
+
+    function renderKPIs(k, fraudCnt, outlierCnt) {
+      const grid = document.getElementById('kpi-grid');
+      grid.innerHTML = '';
+      KPI_DEFS.forEach(({ key, label, icon, color, glow, fmt: f, sub }) => {
+        const v = k[key] ?? 0;
+        const subText = sub ? sub(v, k) : '';
+        const card = document.createElement('div');
+        card.className = 'kpi-card fade-up fade-up-1';
+        card.style.setProperty('--kpi-color', color);
+        card.style.setProperty('--kpi-glow', glow);
+        card.innerHTML = `
+      <span class="kpi-icon">${icon}</span>
+      <div class="kpi-value">${f(v)}</div>
+      <div class="kpi-label">${label}</div>
+      ${subText ? `<div class="kpi-sub">${subText}</div>` : ''}
+    `;
+        grid.appendChild(card);
+      });
+
+      // Fraud + Outlier cards
+      [
+        { label: 'Fraud/Anomaly Flags', icon: '⚠️', color: '#f87171', glow: 'rgba(248,113,113,0.2)', value: fraudCnt },
+        { label: 'High-Cost Outliers', icon: '📡', color: '#f59e0b', glow: 'rgba(245,158,11,0.2)', value: outlierCnt },
+      ].forEach(({ label, icon, color, glow, value }) => {
+        const card = document.createElement('div');
+        card.className = 'kpi-card fade-up fade-up-1';
+        card.style.setProperty('--kpi-color', color);
+        card.style.setProperty('--kpi-glow', glow);
+        card.innerHTML = `
+      <span class="kpi-icon">${icon}</span>
+      <div class="kpi-value">${value}</div>
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-sub">${value > 0 ? 'Requires review' : 'None detected'}</div>
+    `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* ════════════════════════════════════════════════════
+       AI Narrative typewriter
+    ═══════════════════════════════════════════════════════ */
+    function typeNarrative(text) {
+      const el = document.getElementById('ai-text');
+      // Convert markdown bold/em to HTML
+      const html = text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .split('\n').join('<br/>');
+      el.innerHTML = '';
+      let i = 0; const duration = 30;
+      const charArr = html.split('');
+      function tick() {
+        el.innerHTML += charArr[i];
+        i++;
+        if (i < charArr.length) setTimeout(tick, duration < 1 ? 0 : 1);
+      }
+      // Fast type (skip animation for long strings)
+      if (html.length > 600) { el.innerHTML = html; }
+      else { tick(); }
+    }
+
+    /* ════════════════════════════════════════════════════
+       Charts
+    ═══════════════════════════════════════════════════════ */
+    const PALETTE = ['#6c8fff', '#a78bfa', '#34d399', '#f59e0b', '#f87171', '#38bdf8', '#fb923c', '#e879f9',
+      '#4ade80', '#facc15', '#94a3b8', '#67e8f9', '#c084fc', '#f9a8d4', '#86efac'];
+
+    function makeChart(id, type, labels, datasets, opts = {}) {
+      if (chartInstances[id]) { chartInstances[id].destroy(); }
+      const ctx = document.getElementById(id).getContext('2d');
+      chartInstances[id] = new Chart(ctx, {
+        type,
+        data: { labels, datasets },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 }, boxWidth: 12, padding: 12 } },
+            tooltip: {
+              backgroundColor: '#111827', borderColor: 'rgba(99,120,220,0.3)', borderWidth: 1,
+              titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 12,
+              callbacks: {}
+            }
+          },
+          scales: type === 'bar' || type === 'line' ? {
+            x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', maxRotation: 30, font: { size: 11 } } },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.04)' }, ticks: {
+                color: '#64748b', font: { size: 11 },
+                callback: v => v >= 1e6 ? (v / 1e5).toFixed(0) + 'L' : v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v
+              }
+            }
+          } : undefined,
+          ...opts
+        }
+      });
+    }
+
+    function renderCharts(data) {
+      const k = data.kpis || {};
+
+      // Claim type donut
+      const typeData = (data.claim_type_distribution || []).filter(d => d.type && d.type !== 'nan');
+      if (typeData.length) {
+        makeChart('chart-type', 'doughnut',
+          typeData.map(d => d.type), [{
+            data: typeData.map(d => d.count),
+            backgroundColor: PALETTE, borderWidth: 0, hoverOffset: 6,
+          }],
+          { cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+        );
+      } else {
+        // Fallback: cashless vs reimb from KPIs
+        makeChart('chart-type', 'doughnut',
+          ['Cashless', 'Reimbursement'], [{
+            data: [k.cashless_count || 0, k.reimb_count || 0],
+            backgroundColor: ['#6c8fff', '#a78bfa'], borderWidth: 0, hoverOffset: 6,
+          }],
+          { cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+        );
+      }
+
+      // Top hospitals bar
+      const hosp = (data.hospital_breakdown || []).slice(0, 8);
+      if (hosp.length) {
+        makeChart('chart-hospital', 'bar',
+          hosp.map(h => truncate(h.hospital, 20)),
+          [{
+            label: 'Total Amount (₹)',
+            data: hosp.map(h => h.total_amt),
+            backgroundColor: hosp.map((_, i) => PALETTE[i % PALETTE.length] + 'bb'),
+            borderColor: hosp.map((_, i) => PALETTE[i % PALETTE.length]),
+            borderWidth: 2, borderRadius: 6,
+          }]
+        );
+      }
+
+      // Monthly trend line
+      const trend = data.monthly_trend || [];
+      if (trend.length) {
+        makeChart('chart-trend', 'line',
+          trend.map(t => t.month),
+          [{
+            label: 'Claims',
+            data: trend.map(t => t.count),
+            borderColor: '#6c8fff', backgroundColor: 'rgba(108,143,255,0.12)',
+            fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6c8fff',
+            yAxisID: 'y',
+          }, {
+            label: 'Amount (₹)',
+            data: trend.map(t => t.total_amt),
+            borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.08)',
+            fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#a78bfa',
+            yAxisID: 'y1',
+          }],
+          {
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 11 } } },
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6c8fff', font: { size: 11 } }, position: 'left' },
+              y1: {
+                grid: { drawOnChartArea: false }, ticks: {
+                  color: '#a78bfa', font: { size: 11 },
+                  callback: v => v >= 1e5 ? (v / 1e5).toFixed(0) + 'L' : v
+                }, position: 'right'
+              }
+            }
+          }
+        );
+      }
+
+      // Disease breakdown bar
+      const disease = (data.disease_breakdown || []).slice(0, 10);
+      if (disease.length) {
+        makeChart('chart-disease', 'bar',
+          disease.map(d => truncate(d.category, 22)),
+          [{
+            label: 'Claims',
+            data: disease.map(d => d.count),
+            backgroundColor: disease.map((_, i) => PALETTE[i % PALETTE.length] + 'bb'),
+            borderColor: disease.map((_, i) => PALETTE[i % PALETTE.length]),
+            borderWidth: 2, borderRadius: 6,
+          }],
+          {
+            indexAxis: 'y', scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 11 } } },
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { size: 11 } } }
+            }
+          }
+        );
+      }
+
+      // Age group
+      const ages = data.age_breakdown || [];
+      if (ages.length) {
+        makeChart('chart-age', 'bar',
+          ages.map(a => a.group),
+          [{
+            label: 'Members',
+            data: ages.map(a => a.count),
+            backgroundColor: PALETTE.map(c => c + 'bb'),
+            borderColor: PALETTE, borderWidth: 2, borderRadius: 6,
+          }]
+        );
+      }
+
+      // Relation distribution
+      const rels = data.relation_distribution || [];
+      if (rels.length) {
+        makeChart('chart-relation', 'doughnut',
+          rels.map(r => r.relation),
+          [{
+            data: rels.map(r => r.count),
+            backgroundColor: [PALETTE[0], PALETTE[2]], borderWidth: 0, hoverOffset: 6,
+          }],
+          { cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+        );
+      }
+
+      // IPD vs Day Care
+      const ipdDc = data.ipd_vs_daycare || [];
+      if (ipdDc.length) {
+        makeChart('chart-ipd-dc', 'pie',
+          ipdDc.map(i => i.type),
+          [{
+            data: ipdDc.map(i => i.count),
+            backgroundColor: [PALETTE[4], PALETTE[5]], borderWidth: 0, hoverOffset: 6,
+          }],
+          { plugins: { legend: { position: 'bottom' } } }
+        );
+      }
+
+      // Status distribution (Enhanced with Amounts)
+      const status = (data.status_distribution || []).filter(s => s.status && s.status !== 'nan');
+      if (status.length) {
+        try {
+            makeChart('chart-status', 'doughnut',
+              status.map(s => s.status),
+              [{
+                data: status.map(s => s.count),
+                backgroundColor: PALETTE, borderWidth: 0, hoverOffset: 6,
+              }],
+              { 
+                cutout: '60%', 
+                plugins: { 
+                    legend: { position: 'right' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const s = status[context.dataIndex];
+                                if (!s) return '';
+                                return ` ${s.status}: ${fmt(s.count)} claims (₹${fmtAmt(s.total_amt)})`;
+                            }
+                        }
+                    }
+                } 
+              }
+            );
+        } catch(e) { console.error('Status chart failed', e); }
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+       Fraud flags table
+    ═══════════════════════════════════════════════════════ */
+    function renderFraud(flags) {
+      document.getElementById('fraud-count').textContent = flags.length + ' flag' + (flags.length !== 1 ? 's' : '');
+      const body = document.getElementById('fraud-body');
+      if (!flags.length) {
+        body.innerHTML = '<div class="no-flags">✅ No anomalies detected in this dataset</div>';
+        return;
+      }
+      body.innerHTML = `
+    <table class="fraud-table">
+      <thead>
+        <tr>
+          <th>Claim ID</th>
+          <th>Employee</th>
+          <th>Hospital</th>
+          <th>Amount</th>
+          <th>Signals</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${flags.map(f => `
+          <tr class="${f._idx !== undefined ? 'clickable-row' : ''}" onclick="${f._idx !== undefined ? `showDetail(${f._idx})` : ''}">
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94a3b8">${esc(f.claim_id)}</code></td>
+            <td class="clickable-name">${esc(f.employee)}</td>
+            <td>${esc(f.hospital)}</td>
+            <td style="color:#f59e0b;font-weight:600">₹${fmt(Math.round(f.amount))}</td>
+            <td>
+                <div class="signal-tags">${f.signals.map(s => `<span class="signal-tag">${esc(s)}</span>`).join('')}</div>
+                ${f.reason && f.reason !== '—' ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">Reason: ${esc(f.reason)}</div>` : ''}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+    }
+
+    /* ════════════════════════════════════════════════════
+       High-value claims table
+    ═══════════════════════════════════════════════════════ */
+    function renderHighValue(hv) {
+      const body = document.getElementById('high-value-body');
+      if (!hv.length) {
+        body.innerHTML = '<div class="no-flags">✅ No high-value claims (> 2L) in this dataset</div>';
+        return;
+      }
+      body.innerHTML = `
+    <table class="fraud-table">
+      <thead>
+        <tr>
+          <th>Claim ID</th>
+          <th>Employee</th>
+          <th>Hospital</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${hv.map(f => `
+          <tr class="${f._idx !== undefined ? 'clickable-row' : ''}" onclick="${f._idx !== undefined ? `showDetail(${f._idx})` : ''}">
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#94a3b8">${esc(f.claim_id)}</code></td>
+            <td class="clickable-name">${esc(f.employee)}</td>
+            <td>${esc(f.hospital)}</td>
+            <td style="color:#f87171;font-weight:700">₹${fmt(Math.round(f.amount))}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+    }
+
+    /* ════════════════════════════════════════════════════
+       Outlier bars
+    ═══════════════════════════════════════════════════════ */
+    function renderOutliers(outliers) {
+      document.getElementById('outlier-sub').textContent = `${outliers.length} detected · Z-score > 2.5`;
+      const body = document.getElementById('outlier-body');
+      if (!outliers.length) {
+        body.innerHTML = '<div class="no-flags" style="color:var(--accent3)">✅ No high-cost outliers detected</div>';
+        return;
+      }
+      const maxAmt = Math.max(...outliers.map(o => o.amount));
+      body.innerHTML = outliers.map(o => `
+    <div class="outlier-bar">
+      <div class="outlier-label" title="${esc(o.employee || o.claim_id)}">${esc(truncate(o.employee || o.claim_id, 28))}</div>
+      <div class="outlier-track"><div class="outlier-fill" style="width:${(o.amount / maxAmt * 100).toFixed(1)}%"></div></div>
+      <div class="outlier-amt">₹${fmtAmt(o.amount)}</div>
+      <div class="outlier-z">z=${o.z_score}</div>
+    </div>
+  `).join('');
+    }
+
+    /* ════════════════════════════════════════════════════
+       City distribution
+    ═══════════════════════════════════════════════════════ */
+    function renderCities(cities) {
+        const body = document.getElementById('city-body');
+        if (!cities.length) {
+            body.innerHTML = '<div class="no-flags">No city data available</div>';
+            return;
+        }
+        const maxCount = Math.max(...cities.map(c => c.count));
+        body.innerHTML = cities.map(c => `
+        <div class="outlier-bar">
+            <div class="outlier-label" title="${esc(c.city)}">${esc(c.city)}</div>
+            <div class="outlier-track"><div class="outlier-fill" style="width:${(c.count / maxCount * 100).toFixed(1)}%; background: linear-gradient(90deg, var(--accent), var(--accent2))"></div></div>
+            <div class="outlier-amt" style="color:var(--text2)">${fmt(c.count)} claims</div>
+            <div class="outlier-z" style="width: 80px">₹${fmtAmt(c.total_amt)}</div>
+        </div>
+        `).join('');
+    }
+
+    /* ════════════════════════════════════════════════════
+       Details table
+    ═══════════════════════════════════════════════════════ */
+    const COL_LABELS = {
+      claim_id: 'Claim ID', employee_name: 'Employee', hospital: 'Hospital', city: 'City',
+      claim_type: 'Type', status: 'Status', incurred_amt: 'Incurred (₹)', billed_amt: 'Billed (₹)',
+      admission_date: 'Admission', diagnosis: 'Diagnosis', reason: 'Reason/Remarks'
+    };
+
+    function renderDetails(rows) {
+      allRows = rows;
+      const cols = Object.keys(COL_LABELS).filter(c => rows.length && rows[0].hasOwnProperty(c));
+      const thead = document.getElementById('details-thead');
+      const tbody = document.getElementById('details-tbody');
+      thead.innerHTML = `<tr>${cols.map(c => `<th onclick="sortTable('${c}')">${COL_LABELS[c]}</th>`).join('')}</tr>`;
+      renderTableRows(rows, cols);
+    }
+
+    function renderTableRows(rows, cols) {
+      if (!cols) cols = Object.keys(COL_LABELS).filter(c => allRows.length && allRows[0].hasOwnProperty(c));
+      const tbody = document.getElementById('details-tbody');
+      document.getElementById('row-count').textContent = `${rows.length} rows`;
+      tbody.innerHTML = rows.slice(0, 300).map(row => `
+    <tr class="clickable-row" onclick="showDetail(${row._idx})">
+      ${cols.map(c => {
+        const v = row[c] !== undefined ? row[c] : '';
+        if (c === 'status') {
+          const upper = String(v).toUpperCase();
+          const cls = upper.includes('APPROV') || upper.includes('PAID') || upper.includes('SETTLED') ? 'status-approved'
+            : upper.includes('REJECT') || upper.includes('REPUDIAT') || upper.includes('WITHOUT PAY') ? 'status-rejected'
+              : upper.includes('PEND') || upper.includes('OPEN') ? 'status-pending' : 'status-other';
+          return `<td><span class="status-pill ${cls}">${esc(String(v))}</span></td>`;
+        }
+        if ((c === 'incurred_amt' || c === 'billed_amt') && typeof v === 'number' && v > 0) {
+          return `<td style="font-weight:600;color:#a78bfa">₹${fmt(Math.round(v))}</td>`;
+        }
+        if (c === 'admission_date') {
+          const d = new Date(v); const ds = isNaN(d) ? v : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+          return `<td style="color:#64748b;font-family:'JetBrains Mono',monospace;font-size:11px">${esc(ds)}</td>`;
+        }
+        if (c === 'claim_id') return `<td><code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#64748b">${esc(String(v))}</code></td>`;
+        if (c === 'employee_name') return `<td class="clickable-name">${esc(String(v))}</td>`;
+        if (c === 'reason') return `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(String(v))}">${esc(String(v))}</td>`;
+        return `<td>${esc(String(v))}</td>`;
+      }).join('')}
+    </tr>
+  `).join('');
+    }
+
+    /* ════════════════════════════════════════════════════
+       Claim Details Overlay Logic
+    ═══════════════════════════════════════════════════════ */
+    function showDetail(idx) {
+      const row = currentDetails.find(r => r._idx === idx);
+      if (!row) return;
+
+      document.getElementById('detail-overlay').classList.add('active');
+      document.getElementById('detail-name').textContent = row.employee_name || 'Unnamed Claimant';
+      document.getElementById('detail-id').textContent = `Claim ID: ${row.claim_id || 'N/A'}`;
+
+      const grid = document.getElementById('detail-info-grid');
+      grid.innerHTML = '';
+
+      // 3D Body highlighting
+      if (!bodyViewer) {
+        const canvas = document.getElementById('body-3d-canvas');
+        if (canvas) bodyViewer = new BodyViewer3D(canvas);
+      }
+
+      if (bodyViewer) {
+        // Determine severity from claim amount
+        let severity = 'moderate';
+        const amt = typeof row.incurred_amt === 'number' ? row.incurred_amt : 0;
+        if (amt > 300000) severity = 'critical';
+        else if (amt < 50000) severity = 'mild';
+
+        bodyViewer.highlight(row.body_part || 'body', severity);
+        const label = (row.body_part || 'general').toUpperCase().replace('-', ' ');
+        document.getElementById('bodypart-label').textContent = label + ' — AFFECTED';
+      }
+
+      // Populate grid with all available details
+      const details = row.all_details || {};
+      Object.entries(details).forEach(([key, val]) => {
+          if (val === 'nan' || val === 'None' || val === '') return;
+          const item = document.createElement('div');
+          item.className = 'detail-item';
+          item.innerHTML = `
+              <div class="detail-label">${esc(key)}</div>
+              <div class="detail-value">${esc(val)}</div>
+          `;
+          grid.appendChild(item);
+      });
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('active');
+      if (bodyViewer) bodyViewer.reset();
+    }
+
+    function filterTable() {
+      const q = document.getElementById('search-box').value.toLowerCase();
+      const filtered = q ? allRows.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q))) : allRows;
+      renderTableRows(filtered);
+    }
+
+    let sortCol = '', sortAsc = true;
+    function sortTable(col) {
+      if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+      const sorted = [...allRows].sort((a, b) => {
+        const va = a[col] ?? '', vb = b[col] ?? '';
+        if (typeof va === 'number' && typeof vb === 'number') return sortAsc ? va - vb : vb - va;
+        return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+      });
+      renderTableRows(sorted);
+    }
+
+    /* ════════════════════════════════════════════════════
+       UI helpers
+    ═══════════════════════════════════════════════════════ */
+    let stepTimer;
+    function animateSteps() {
+      const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5'];
+      let i = 0;
+      steps.forEach(s => document.getElementById(s).classList.remove('active'));
+      document.getElementById(steps[0]).classList.add('active');
+      stepTimer = setInterval(() => {
+        if (i < steps.length - 1) {
+          document.getElementById(steps[i]).classList.remove('active');
+          i++;
+          document.getElementById(steps[i]).classList.add('active');
+        } else { clearInterval(stepTimer); }
+      }, 900);
+    }
+
+    function showLoading() {
+      const loading = document.getElementById('loading');
+      loading.classList.add('visible');
+      document.getElementById('dashboard').classList.remove('visible');
+    }
+    function hideLoading() {
+      clearInterval(stepTimer);
+      document.getElementById('loading').classList.remove('visible');
+      document.getElementById('sample-btn').disabled = false;
+    }
+
+    function resetDashboard() {
+      document.getElementById('dashboard').classList.remove('visible');
+      document.getElementById('upload-section').classList.remove('hidden');
+      document.getElementById('sample-btn').disabled = false;
+      allFiles = []; activeIndex = 0;
+    }
+
+    let toastTimer;
+    function showToast(msg, type = 'error') {
+      const t = document.getElementById('toast');
+      t.textContent = (type === 'error' ? '⚠️ ' : '✅ ') + msg;
+      t.className = 'show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+    }
+
+    function fmt(n) { return Number(n).toLocaleString('en-IN'); }
+    function fmtAmt(n) {
+      if (n >= 1e7) return (n / 1e7).toFixed(2) + ' Cr';
+      if (n >= 1e5) return (n / 1e5).toFixed(2) + ' L';
+      return fmt(Math.round(n));
+    }
+    function truncate(s, n) { return String(s).length > n ? String(s).slice(0, n - 1) + '…' : String(s); }
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+
+    /* ════════════════════════════════════════════════════
+       LLM Narrative
+    ═══════════════════════════════════════════════════════ */
+    async function generateLLMNarrative() {
+      const key = getApiKey();
+      if (!key) { toggleSettings(); showToast('Please enter your OpenAI API key first', 'error'); return; }
+      if (!currentData) { showToast('No data loaded yet', 'error'); return; }
+
+      const btn = document.getElementById('llm-narrative-btn');
+      const spinner = document.getElementById('narr-spinner');
+      btn.disabled = true;
+      spinner.classList.add('visible');
+      document.getElementById('ai-text').innerHTML = '<span style="color:var(--text3)">Gemini is reading your claim portfolio…</span>';
+
+      try {
+        const res = await fetch('/api/narrative', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_key: key,
+            file: currentData.file,
+            kpis: currentData.kpis,
+            hospital_breakdown: currentData.hospital_breakdown,
+            monthly_trend: currentData.monthly_trend,
+            fraud_flags: currentData.fraud_flags,
+            disease_breakdown: currentData.disease_breakdown,
+          }),
+        });
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); document.getElementById('ai-text').textContent = data.error; return; }
+        typeNarrative(data.narrative);
+        showToast('GPT-4o narrative generated!', 'success');
+      } catch (e) {
+        showToast('Narrative failed: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.remove('visible');
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+       Chat / Text-to-Pandas
+    ═══════════════════════════════════════════════════════ */
+    function prefill(q) {
+      document.getElementById('chat-input').value = q;
+      document.getElementById('chat-input').focus();
+    }
+
+    async function sendChat() {
+      const key = getApiKey();
+      if (!key) { toggleSettings(); showToast('Please enter your OpenAI API key first', 'error'); return; }
+      const q = document.getElementById('chat-input').value.trim();
+      if (!q) return;
+
+      const file = currentData ? currentData.file : '';
+      const resp = document.getElementById('chat-response');
+      resp.classList.add('visible');
+
+      // Show loading
+      document.getElementById('chat-loading').style.display = 'flex';
+      document.getElementById('chat-error').style.display = 'none';
+      document.getElementById('chat-explanation').style.display = 'none';
+      document.getElementById('chat-code-block').style.display = 'none';
+      document.getElementById('chat-result').style.display = 'none';
+      document.getElementById('chat-send-btn').disabled = true;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: key, question: q, file }),
+        });
+        const data = await res.json();
+
+        document.getElementById('chat-loading').style.display = 'none';
+
+        if (data.error) {
+          const errEl = document.getElementById('chat-error');
+          errEl.style.display = 'block';
+          errEl.textContent = '⚠️ ' + data.error;
+          return;
+        }
+
+        // Explanation
+        if (data.explanation) {
+          const el = document.getElementById('chat-explanation');
+          el.style.display = 'block';
+          el.innerHTML = '💡 ' + mdBold(esc(data.explanation));
+        }
+
+        // Generated code
+        if (data.code) {
+          currentCode = data.code;
+          document.getElementById('chat-code-pre').textContent = data.code;
+          document.getElementById('chat-code-block').style.display = 'block';
+        }
+
+        // Result table / scalar
+        if (data.result_html) {
+          const el = document.getElementById('chat-result');
+          el.style.display = 'block';
+          el.innerHTML = data.result_html;
+          // Style the injected table
+          el.querySelectorAll('table').forEach(t => t.classList.add('llm-result-table'));
+        }
+      } catch (e) {
+        document.getElementById('chat-loading').style.display = 'none';
+        const errEl = document.getElementById('chat-error');
+        errEl.style.display = 'block';
+        errEl.textContent = '⚠️ Request failed: ' + e.message;
+      } finally {
+        document.getElementById('chat-send-btn').disabled = false;
+      }
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(currentCode).then(() => showToast('Code copied!', 'success'));
+    }
+
+    function mdBold(s) { return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
+
+    /* ════════════════════════════════════════════════════
+       PDF Policy RAG
+    ═══════════════════════════════════════════════════════ */
+    function handlePdfDrop(e) {
+      e.preventDefault();
+      document.getElementById('pdf-drop').classList.remove('dragover');
+      if (e.dataTransfer.files.length) uploadPDF(e.dataTransfer.files[0]);
+    }
+
+    async function uploadPDF(file) {
+      const key = getApiKey();
+      if (!key) { toggleSettings(); showToast('Please enter your OpenAI API key first', 'error'); return; }
+      if (!file || !file.name.endsWith('.pdf')) { showToast('Please upload a PDF file', 'error'); return; }
+
+      const drop = document.getElementById('pdf-drop');
+      drop.innerHTML = '<div style="font-size:28px">⏳</div><div style="color:var(--text3);margin-top:8px">Indexing PDF with OpenAI embeddings…<br/><small>This may take 15–30 seconds</small></div>';
+      drop.style.pointerEvents = 'none';
+
+      const form = new FormData();
+      form.append('file', file);
+      form.append('api_key', key);
+
+      try {
+        const res = await fetch('/api/upload-policy', { method: 'POST', body: form });
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); resetPDF(); return; }
+
+        ragStoreId = data.store_id;
+        document.getElementById('pdf-filename').textContent = data.filename || file.name;
+        document.getElementById('pdf-chunks').textContent = `${data.chunks_count} sections indexed`;
+        document.getElementById('pdf-drop').style.display = 'none';
+        document.getElementById('pdf-uploaded').classList.add('visible');
+        showToast(`Policy "${file.name}" indexed — ${data.chunks_count} sections`, 'success');
+      } catch (e) {
+        showToast('PDF upload failed: ' + e.message, 'error');
+        resetPDF();
+      }
+    }
+
+    function resetPDF() {
+      ragStoreId = null;
+      document.getElementById('pdf-drop').style.display = '';
+      document.getElementById('pdf-drop').style.pointerEvents = '';
+      document.getElementById('pdf-drop').innerHTML = `
+        <div style="font-size:40px;margin-bottom:12px">📄</div>
+        <div style="font-size:16px;font-weight:600;color:var(--text)">Drop policy PDF here or <span style="color:var(--accent2)">browse</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-top:6px">Group mediclaim policies, endorsements, policy wording documents</div>
+        <input type="file" id="pdf-input" accept=".pdf" style="display:none" onchange="uploadPDF(this.files[0])" />`;
+      document.getElementById('pdf-uploaded').classList.remove('visible');
+      document.getElementById('rag-response').classList.remove('visible');
+    }
+
+    function prefillRAG(q) {
+      document.getElementById('rag-input').value = q;
+      document.getElementById('rag-input').focus();
+    }
+
+    async function sendRAG() {
+      const key = getApiKey();
+      if (!key) { toggleSettings(); showToast('Please enter your OpenAI API key first', 'error'); return; }
+      if (!ragStoreId) { showToast('Please upload a policy PDF first', 'error'); return; }
+      const q = document.getElementById('rag-input').value.trim();
+      if (!q) return;
+
+      document.getElementById('rag-response').classList.add('visible');
+      document.getElementById('rag-loading').style.display = 'flex';
+      document.getElementById('rag-answer').style.display = 'none';
+      document.getElementById('rag-sources').innerHTML = '';
+      document.getElementById('rag-send-btn').disabled = true;
+
+      try {
+        const res = await fetch('/api/policy-qa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: key, question: q, store_id: ragStoreId }),
+        });
+        const data = await res.json();
+
+        document.getElementById('rag-loading').style.display = 'none';
+
+        if (data.error) { showToast(data.error, 'error'); return; }
+
+        const answerEl = document.getElementById('rag-answer');
+        answerEl.style.display = 'block';
+        answerEl.innerHTML = mdBold(esc(data.answer)).split('\n').join('<br/>');
+
+        const sourcesEl = document.getElementById('rag-sources');
+        (data.sources || []).forEach(s => {
+          const div = document.createElement('div');
+          div.className = 'rag-source';
+          div.innerHTML = `<span class="page-tag">Page ${s.page}</span>${esc(s.snippet)}`;
+          sourcesEl.appendChild(div);
+        });
+      } catch (e) {
+        document.getElementById('rag-loading').style.display = 'none';
+        showToast('RAG failed: ' + e.message, 'error');
+      } finally {
+        document.getElementById('rag-send-btn').disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>

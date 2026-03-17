@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+rag_cache/
+*.xlsb
+*.xlsx
+.DS_Store
+.vscode/
+.idea/
+.gemini/
+node_modules/
