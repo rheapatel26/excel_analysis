@@ -2473,6 +2473,7 @@
     /* ════════════════════════════════════════════════════
        State
     ═══════════════════════════════════════════════════════ */
+    const API_BASE = "https://excel-analysis-740i.onrender.com";
     let allFiles = [];
     let activeIndex = 0;
     let chartInstances = {};
@@ -2571,7 +2572,7 @@
       const form = new FormData();
       form.append('file', file);
       try {
-        const res = await fetch('/api/analyze', { method: 'POST', body: form });
+        const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: form });
         const data = await res.json();
         if (data.error) { showToast(data.error, 'error'); hideLoading(); return; }
         allFiles = [data];
@@ -2591,7 +2592,7 @@
       showLoading();
       animateSteps();
       try {
-        const res = await fetch('/api/sample');
+        const res = await fetch(`${API_BASE}/api/sample`);
         const data = await res.json();
         if (data.error) { showToast(data.error, 'error'); hideLoading(); return; }
         allFiles = data.files.filter(f => !f.error);
@@ -3243,7 +3244,7 @@
       document.getElementById('ai-text').innerHTML = '<span style="color:var(--text3)">Gemini is reading your claim portfolio…</span>';
 
       try {
-        const res = await fetch('/api/narrative', {
+        const res = await fetch(`${API_BASE}/api/narrative`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -3295,7 +3296,7 @@
       document.getElementById('chat-send-btn').disabled = true;
 
       try {
-        const res = await fetch('/api/chat', {
+        const res = await fetch(`${API_BASE}/api/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ api_key: key, question: q, file }),
@@ -3372,7 +3373,7 @@
       form.append('api_key', key);
 
       try {
-        const res = await fetch('/api/upload-policy', { method: 'POST', body: form });
+        const res = await fetch(`${API_BASE}/api/upload-policy`, { method: 'POST', body: form });
         const data = await res.json();
         if (data.error) { showToast(data.error, 'error'); resetPDF(); return; }
 
@@ -3420,7 +3421,7 @@
       document.getElementById('rag-send-btn').disabled = true;
 
       try {
-        const res = await fetch('/api/policy-qa', {
+        const res = await fetch(`${API_BASE}/api/policy-qa`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ api_key: key, question: q, store_id: ragStoreId }),

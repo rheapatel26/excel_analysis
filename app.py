@@ -8,9 +8,11 @@ import os
 import json
 import tempfile
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from analyzer import analyze
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+CORS(app) # Enable CORS for all routes
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
