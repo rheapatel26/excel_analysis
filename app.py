@@ -13,8 +13,8 @@ from analyzer import analyze
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-# Standard CORS setup - handle preflight and allow all origins for now
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# Strict CORS setup - limit to the specific Vercel domain to avoid multi-value conflicts
+CORS(app, resources={r"/api/*": {"origins": "https://excel-analysis-olive.vercel.app"}})
 
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
