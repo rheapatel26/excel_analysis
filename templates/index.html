@@ -2597,8 +2597,23 @@
         const res = await fetch(`${API_BASE}/api/sample`);
         const data = await res.json();
         if (data.error) { showToast(data.error, 'error'); hideLoading(); return; }
-        allFiles = data.files.filter(f => !f.error);
-        if (!allFiles.length) { showToast('No sample files could be analyzed', 'error'); hideLoading(); return; }
+        
+        const sampleFiles = data.files;
+        if (!sampleFiles.length) { showToast('No sample files found', 'error'); hideLoading(); return; }
+
+        // Analyze each file one by one to avoid backend timeout
+        allFiles = [];
+        for (const f of sampleFiles) {
+             try {
+                const analysisRes = await fetch(`${API_BASE}/api/sample/analyze/${f.file}`);
+                const analysisData = await analysisRes.json();
+                if (!analysisData.error) {
+                    allFiles.push(analysisData);
+                }
+             } catch(e) { console.error('Failed to analyze', f.file, e); }
+        }
+
+        if (!allFiles.length) { showToast('Sample analysis failed', 'error'); hideLoading(); return; }
         activeIndex = 0;
         buildDashboard(allFiles);
       } catch (e) {

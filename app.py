@@ -12,19 +12,15 @@ from flask_cors import CORS
 from analyzer import analyze
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+
+# Standard CORS setup - handle preflight and allow all origins for now
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    return response
-
-@app.route('/api/<path:path>', methods=['OPTIONS'])
-def handle_options(path):
-    return '', 200
+@app.route("/health")
+def health():
+    return "OK", 200
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -105,25 +101,60 @@ def analyze_upload():
 
 @app.route("/api/sample", methods=["GET"])
 def analyze_sample():
-    from analyzer import read_file, _best_sheet, ALIASES, _find_col
+    """
+    Returns the list of sample files. 
+    Frontend will now be responsible for analyzing them one-by-one or as needed.
+    """
+    print(f"📁 Listing samples in {DATA_DIR}")
     results = []
     for fname in SAMPLE_FILES:
         path = os.path.join(DATA_DIR, fname)
         if os.path.exists(path):
-            try:
-                r = analyze(path)
-                results.append(r)
-                # Cache df for NL querying
-                sheets = read_file(path)
-                df = _best_sheet(sheets)
-                cols = {role: _find_col(df, role) for role in ALIASES}
-                col_map = {k: v for k, v in cols.items() if v}
-                _put_df(fname, df, col_map)
-            except Exception as e:
-                results.append({"file": fname, "error": str(e)})
+            # Just return metadata for now to avoid time-consuming bulk analysis
+            results.append({
+                "file": fname,
+                "status": "ready",
+                "path": path,
+                "size": os.path.getsize(path)
+            })
+        else:
+            print(f"⚠️ Missing sample file: {fname}")
+
     if not results:
-        return jsonify({"error": "No sample files found"}), 404
+        # Diagnostic info
+        ls = os.listdir(DATA_DIR)
+        return jsonify({
+            "error": "No sample files found",
+            "debug": {
+                "DATA_DIR": DATA_DIR,
+                "dir_contents": ls
+            }
+        }), 404
     return jsonify({"files": results})
+
+@app.route("/api/sample/analyze/<filename>", methods=["GET"])
+def analyze_specific_sample(filename):
+    """Bridge for lazy analysis of sample files."""
+    from analyzer import read_file, _best_sheet, ALIASES, _find_col
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return jsonify({"error": f"File not found: {filename}"}), 404
+    try:
+        print(f"🔍 Analyzing sample: {filename}")
+        result = analyze(path)
+        result["file"] = filename
+
+        # Cache df for NL querying
+        sheets = read_file(path)
+        df = _best_sheet(sheets)
+        cols = {role: _find_col(df, role) for role in ALIASES}
+        col_map = {k: v for k, v in cols.items() if v}
+        _put_df(filename, df, col_map)
+        
+        return jsonify(result)
+    except Exception as e:
+        print(f"🔥 Error analyzing {filename}: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/sample/<filename>", methods=["GET"])
