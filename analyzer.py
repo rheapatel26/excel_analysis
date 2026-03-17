@@ -301,14 +301,15 @@ def disease_breakdown(df: pd.DataFrame, cols: dict) -> list:
 
     if cat_col:
         grp_col = cat_col
-        df["_cat"] = df[cat_col].astype(str).str.strip()
+        # Fix fragmentation warning by creating a clean copy or using local series
+        disease_series = df[cat_col].astype(str).str.strip()
     elif icd_col:
-        df["_cat"] = df[icd_col].astype(str).apply(_icd_chapter)
+        disease_series = df[icd_col].astype(str).apply(_icd_chapter)
         grp_col = "_cat"
     else:
         return []
 
-    tmp = df[["_cat"]].copy()
+    tmp = pd.DataFrame({"_cat": disease_series})
     if inc_col:
         tmp["amt"] = _to_numeric(df[inc_col])
     else:
@@ -559,8 +560,13 @@ def ipd_vs_daycare_breakdown(df: pd.DataFrame, cols: dict) -> list:
         text_data += " " + df[c].astype(str).str.upper()
 
     def detect(txt):
-        if "DAY CARE" in txt or "DAYCARE" in txt: return "Day Care"
-        if "IPD" in txt or "INPATIENT" in txt: return "IPD"
+        try:
+            if not txt or pd.isna(txt): return "Other"
+            t = str(txt).upper()
+            if "DAY CARE" in t or "DAYCARE" in t: return "Day Care"
+            if "IPD" in t or "INPATIENT" in t: return "IPD"
+        except:
+            pass
         return "Other"
 
     detected = text_data.apply(detect)
