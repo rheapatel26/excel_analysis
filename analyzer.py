@@ -553,11 +553,12 @@ def ipd_vs_daycare_breakdown(df: pd.DataFrame, cols: dict) -> list:
     """Detect IPD vs Day Care from available columns."""
     # Look for indicators in 'Room Desc', 'Room Category', 'Diagnosis', 'Claim Type'
     possible_cols = [cols.get("claim_type"), "Room Desc", "Availed Room Category H", "Ip No"]
-    # Check all columns for keywords
-    text_data = pd.Series([""] * len(df))
+    # Check all columns for keywords — must ensure text_data never contains NaN
+    text_data = pd.Series([""] * len(df), index=df.index)
     for c in df.columns:
         if c in _BLOCKLIST: continue
-        text_data += " " + df[c].astype(str).str.upper()
+        text_data = text_data + " " + df[c].astype(str).fillna("").str.upper()
+    text_data = text_data.fillna("")
 
     def detect(txt):
         try:
