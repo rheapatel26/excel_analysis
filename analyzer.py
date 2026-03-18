@@ -727,6 +727,8 @@ def analyze(path: str) -> dict:
     """Full analysis pipeline. Returns a JSON-serialisable dict."""
     sheets = read_file(path)
     df = _best_sheet(sheets)
+    # Reset index to 0-based to prevent KeyError when header rows were skipped
+    df = df.reset_index(drop=True)
 
     # Auto-detect columns
     cols = {role: _find_col(df, role) for role in ALIASES}
