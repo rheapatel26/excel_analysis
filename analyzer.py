@@ -14,43 +14,69 @@ from datetime import datetime
 ALIASES = {
     # exact real column names listed first for priority
     "claim_id":      ["claim no", "claim reference", "claim ref", "claimno", "claim_id",
-                      "claim number", "claimnumber"],
+                      "claim number", "claimnumber", "sr no", "serial no", "s.no",
+                      "claim id", "reference no", "ref no", "claim sl no"],
     "employee_name": ["employee name", "insured", "insured name", "member name",
-                      "employee_name", "patient name"],
+                      "employee_name", "patient name", "name of insured", "name",
+                      "claimant name", "policyholder name", "member"],
     # 'Hospital' exact match first; 'Hospital Type' is blocklisted inside _find_col
     "hospital":      ["hospital", "hospital name", "provider name", "facility name",
-                      "hospitalname", "hospital_name"],
-    "city":          ["city", "claim location", "hospital city", "location"],
-    "state":         ["state", "hospital state", "statename"],
+                      "hospitalname", "hospital_name", "name of hospital",
+                      "service provider", "network hospital"],
+    "city":          ["city", "claim location", "hospital city", "location",
+                      "city name", "hospital location"],
+    "state":         ["state", "hospital state", "statename", "state name"],
     "claim_type":    ["claim type", "claimtype", "type of claim", "claim_type",
-                      "reimbursement or cashless", "type"],
+                      "reimbursement or cashless", "type", "cashless/reimbursement",
+                      "cashless or reimbursement", "claim category"],
     # Pay Status / Claim Close Status are the settled/rejected flags in the MIS
     "status":        ["pay status", "claim close status", "claim status", "final claim status",
-                      "final status", "claim_status", "decision", "settlement status", "status"],
+                      "final status", "claim_status", "decision", "settlement status", "status",
+                      "current status", "claim decision", "approval status"],
     "incurred_amt":  ["incurred_amt", "incurred amt", "incurred amount", "ic_amt",
                       "paid claim amount", "settled amount", "approved amount",
-                      "auth amount", "final approved amount", "net payable", "amount payable"],
+                      "auth amount", "final approved amount", "net payable", "amount payable",
+                      "claim amount", "amount", "total amount", "net amount",
+                      "claim amt", "paid amount", "payable amount",
+                      "sanctioned amount", "net claim amount", "net paid",
+                      "total claim amount", "ic amount", "incurred",
+                      "disbursed amount", "approved amt", "paid amt",
+                      "claim value", "settlement amount", "total paid"],
     # 'Total Bill' exact match; blocklist 'Hospital Bill No'
     "billed_amt":    ["total bill", "claimed amt", "billed amount", "bill amount",
-                      "total bill amount", "gross amount", "hospital billed amount"],
+                      "total bill amount", "gross amount", "hospital billed amount",
+                      "claimed amount", "initial claimed amount", "total claimed",
+                      "sum claimed", "billed amt", "hospital bill amount",
+                      "estimated amount", "pre auth amount", "preauth amount"],
     "admission_date":["actual doa", "expected doa", "admission date", "date of admission",
-                      "doa", "hospitalization date", "admission_date", "treatment from date"],
+                      "doa", "hospitalization date", "admission_date", "treatment from date",
+                      "date of hospitalization", "claim date", "intimation date",
+                      "date of loss", "loss date", "event date", "date",
+                      "from date", "treatment date", "registration date",
+                      "claim intimation date", "date of claim"],
     "discharge_date":["actual dod", "expected dod", "discharge date", "date of discharge",
-                      "dod", "discharge_date", "treatment to date"],
-    "icd_code":      ["icd code", "icd_code", "diagnosis code", "icd10"],
+                      "dod", "discharge_date", "treatment to date",
+                      "to date", "date of discharge from hospital"],
+    "icd_code":      ["icd code", "icd_code", "diagnosis code", "icd10", "icd 10"],
     "diagnosis":     ["provisional diagnosis", "final diagnosis", "diagnosis", "disease",
-                      "ailment", "diagnosis name", "disease name", "primary diagnosis"],
+                      "ailment", "diagnosis name", "disease name", "primary diagnosis",
+                      "nature of illness", "nature of disease", "ailment description",
+                      "cause", "cause of claim", "peril"],
     "disease_cat":   ["disease category", "revd disease category", "disease cat",
-                      "chapter", "icd chapter", "disease chapter"],
-    "gender":        ["gender", "sex", "patient gender"],
-    "age":           ["age", "patient age", "member age", "insured age"],
-    "relation":      ["relation", "relationship", "member relation", "insured relation"],
-    "sum_insured":   ["sum insured", "coverage", "policy sum insured"],
+                      "chapter", "icd chapter", "disease chapter", "broad category"],
+    "gender":        ["gender", "sex", "patient gender", "member gender"],
+    "age":           ["age", "patient age", "member age", "insured age", "age at admission"],
+    "relation":      ["relation", "relationship", "member relation", "insured relation",
+                      "relation with employee", "proposer relation"],
+    "sum_insured":   ["sum insured", "coverage", "policy sum insured", "si",
+                      "cover amount", "sum assured"],
     "deduction_amt": ["other deduction", "deduction", "deductions", "total deduction",
-                      "disallowed amount", "non payable", "deducted amount"],
+                      "disallowed amount", "non payable", "deducted amount",
+                      "disallowance", "co-pay", "copay"],
     "reason":        ["reason", "remark", "repudiation reason", "denial reason", "non_pay_reason",
                       "claim_approval_remark", "documents_remarks", "orphan remark", "query remark",
-                      "general remarks", "insured disallow amt reason", "hospital disallow amt reason"],
+                      "general remarks", "insured disallow amt reason", "hospital disallow amt reason",
+                      "remarks", "comments", "observation"],
 }
 
 ICD_CHAPTERS = {
@@ -101,6 +127,22 @@ def _find_col(df: pd.DataFrame, role: str) -> str | None:
                 continue
             if t == col_low or (len(t) > 4 and t in col_low):
                 return col_orig
+    # 3) Fuzzy fallback — column name contains key terms for critical roles
+    _ROLE_KEYWORDS = {
+        "incurred_amt": ["amount", "amt", "paid", "payable", "incurred", "claim"],
+        "admission_date": ["date", "doa", "admission"],
+        "billed_amt": ["bill", "claimed", "gross"],
+    }
+    keywords = _ROLE_KEYWORDS.get(role, [])
+    if keywords:
+        for col_low, col_orig in cols_lower.items():
+            if col_low in _BLOCKLIST:
+                continue
+            for kw in keywords:
+                if kw in col_low and col_low not in ["claim no", "claim type", "claim status",
+                    "claim id", "claim number", "claim ref", "claim category",
+                    "amount type", "date of birth", "dob", "bill no", "bill number"]:
+                    return col_orig
     return None
 
 
@@ -732,6 +774,14 @@ def analyze(path: str) -> dict:
 
     # Auto-detect columns
     cols = {role: _find_col(df, role) for role in ALIASES}
+
+    # Diagnostic logging for production debugging
+    detected = {k: v for k, v in cols.items() if v}
+    missing = [k for k, v in cols.items() if not v]
+    print(f"📊 Detected {len(detected)} columns: {detected}")
+    if missing:
+        print(f"⚠️ Missing roles: {missing}")
+    print(f"📋 Available columns: {list(df.columns)}")
 
     # Run all analyses
     kpi = kpis(df, cols)
