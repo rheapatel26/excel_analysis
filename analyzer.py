@@ -536,6 +536,7 @@ def relation_distribution(df: pd.DataFrame, cols: dict) -> list:
     
     # Map to groups: Self, Dependent (Son, Daughter, Child, etc.)
     def group_rel(r):
+        r = str(r) if not isinstance(r, str) else r
         if r == "SELF": return "Self"
         if any(x in r for x in ["SON", "DAUGHTER", "CHILD", "SPOUSE", "MOTHER", "FATHER", "IN-LAW"]): return "Dependents"
         return "Other"
@@ -557,8 +558,9 @@ def ipd_vs_daycare_breakdown(df: pd.DataFrame, cols: dict) -> list:
     text_data = pd.Series([""] * len(df), index=df.index)
     for c in df.columns:
         if c in _BLOCKLIST: continue
-        text_data = text_data + " " + df[c].astype(str).fillna("").str.upper()
-    text_data = text_data.fillna("")
+        col_str = df[c].astype(str).fillna("").str.upper()
+        text_data = text_data.str.cat(col_str, sep=" ", na_rep="")
+    text_data = text_data.fillna("").astype(str)
 
     def detect(txt):
         try:
@@ -646,8 +648,11 @@ def _lakhs(amount: float) -> str:
 
 def _detect_body_part(row: pd.Series, icd_col: str, diag_col: str) -> str:
     """Heuristic mapping of diagnosis to body part."""
-    code = str(row.get(icd_col, "")).upper().strip()
-    diag = str(row.get(diag_col, "")).upper()
+    code = str(row.get(icd_col, "")).upper().strip() if isinstance(row.get(icd_col, ""), str) else ""
+    diag = str(row.get(diag_col, "")).upper() if isinstance(row.get(diag_col, ""), str) else str(row.get(diag_col, "")).upper() if row.get(diag_col) is not None else ""
+    # Ensure diag is always a string
+    if not isinstance(diag, str):
+        diag = str(diag) if diag is not None else ""
     
     # Keyword priority
     if any(x in diag for x in ["BRAIN", "MIND", "PSYCH", "HEAD", "SKULL", "MIGRAINE", "CONVULSION", "EYE", "EAR", "THROAT", "DENTAL"]): return "head"
@@ -739,9 +744,18 @@ def analyze(path: str) -> dict:
     type_dist = claim_type_dist(df, cols)
     gender_dist = gender_breakdown(df, cols)
     age_dist = age_breakdown(df, cols)
-    relation_dist = relation_distribution(df, cols)
-    ipd_dc = ipd_vs_daycare_breakdown(df, cols)
-    chronic = chronic_breakdown(df, cols)
+    try:
+        relation_dist = relation_distribution(df, cols)
+    except Exception:
+        relation_dist = []
+    try:
+        ipd_dc = ipd_vs_daycare_breakdown(df, cols)
+    except Exception:
+        ipd_dc = []
+    try:
+        chronic = chronic_breakdown(df, cols)
+    except Exception:
+        chronic = []
     narrative = ai_narrative(kpi, hosp, trend, fl, diseases)
     details = get_details_table(df, cols)
 
