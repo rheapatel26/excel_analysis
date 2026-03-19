@@ -13,8 +13,8 @@ from analyzer import analyze
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-# Strict CORS setup - limit to the specific Vercel domain to avoid multi-value conflicts
-CORS(app, resources={r"/api/*": {"origins": "https://excel-analysis-olive.vercel.app"}})
+# CORS setup - allow local dev + deployed Vercel frontend
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB
 
@@ -324,6 +324,56 @@ def policy_qa():
         return jsonify({"answer": answer, "sources": sources})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ─── NEW: Download PPT ────────────────────────────────────────────────────────
+
+@app.route("/api/download-ppt", methods=["POST"])
+def download_ppt():
+    """
+    Accepts an Excel file upload, runs analysis, and returns an editable .pptx file.
+    """
+    print("📢 PPT download request received")
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    f = request.files["file"]
+    if not f.filename:
+        return jsonify({"error": "Empty filename"}), 400
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in (".xlsx", ".xlsb", ".xls"):
+        return jsonify({"error": "Only .xlsx / .xlsb / .xls files are supported"}), 400
+
+    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+        f.save(tmp.name)
+        tmp_path = tmp.name
+
+    try:
+        print(f"🔍 Running analysis for PPT: {f.filename}")
+        result = analyze(tmp_path)
+        result["file"] = f.filename
+
+        print("📊 Generating PPT...")
+        from ppt_generator import generate_ppt
+        ppt_buffer = generate_ppt(result)
+
+        safe_name = os.path.splitext(f.filename)[0]
+        download_name = f"{safe_name}_Report.pptx"
+
+        from flask import send_file
+        print(f"✅ PPT generated: {download_name}")
+        return send_file(
+            ppt_buffer,
+            mimetype="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            as_attachment=True,
+            download_name=download_name
+        )
+    except Exception as e:
+        print(f"🔥 ERROR in download_ppt: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        os.unlink(tmp_path)
 
 
 # ─── Run ──────────────────────────────────────────────────────────────────────

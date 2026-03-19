@@ -8,3 +8,4 @@ pypdf>=4.0.0
 python-dotenv
 gunicorn
 flask-cors
+python-pptx>=0.6.21

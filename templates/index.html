@@ -1816,6 +1816,7 @@
           </div>
         </div>
         <div class="file-switcher" id="file-switcher"></div>
+        <button class="btn btn-primary" id="download-ppt-btn" onclick="downloadPPT()" style="display:none;gap:6px;">📥 Download PPT</button>
         <button class="btn btn-secondary" onclick="resetDashboard()">↑ New Upload</button>
       </div>
 
@@ -2475,7 +2476,8 @@
     /* ════════════════════════════════════════════════════
        State
     ═══════════════════════════════════════════════════════ */
-    const API_BASE = "https://excel-analysis-740i.onrender.com";
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || /^192\.168\./.test(window.location.hostname))
+      ? '' : "https://excel-analysis-740i.onrender.com";
     let allFiles = [];
     let activeIndex = 0;
     let chartInstances = {};
@@ -2484,6 +2486,7 @@
     let currentData = null;    // active file's full analysis JSON
     let ragStoreId = null;    // active PDF store_id
     let currentCode = '';      // last generated Pandas code
+    let uploadedFile = null;   // stored File object for PPT download
 
     /* ════════════════════════════════════════════════════
        API Key helpers
@@ -2571,6 +2574,7 @@
     async function uploadFile(file) {
       showLoading();
       animateSteps();
+      uploadedFile = file;  // store for PPT download
       const form = new FormData();
       form.append('file', file);
       try {
@@ -2580,9 +2584,48 @@
         allFiles = [data];
         activeIndex = 0;
         buildDashboard([data]);
+        // Show PPT download button
+        document.getElementById('download-ppt-btn').style.display = 'inline-flex';
       } catch (e) {
         showToast('Analysis failed: ' + e.message, 'error');
         hideLoading();
+      }
+    }
+
+    /* ════════════════════════════════════════════════════
+       Download PPT
+    ═══════════════════════════════════════════════════════ */
+    async function downloadPPT() {
+      if (!uploadedFile) { showToast('No file available for PPT generation. Please upload a file first.', 'error'); return; }
+      const btn = document.getElementById('download-ppt-btn');
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Generating…';
+      try {
+        const form = new FormData();
+        form.append('file', uploadedFile);
+        const res = await fetch(`${API_BASE}/api/download-ppt`, { method: 'POST', body: form });
+        if (!res.ok) {
+          const err = await res.json();
+          showToast('PPT generation failed: ' + (err.error || 'Unknown error'), 'error');
+          return;
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const fname = uploadedFile.name.replace(/\.[^.]+$/, '') + '_Report.pptx';
+        a.href = url;
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showToast('PPT downloaded successfully!', 'success');
+      } catch (e) {
+        showToast('PPT download failed: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
       }
     }
 
