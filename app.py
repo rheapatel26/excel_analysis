@@ -7,7 +7,7 @@ Run with: python app.py
 import os
 import json
 import tempfile
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 from analyzer import analyze
 
@@ -49,7 +49,12 @@ def _put_df(store_key: str, df, column_map: dict):
 
 @app.route("/")
 def index():
-    return send_from_directory("templates", "index.html")
+    return render_template("index.html")
+
+
+@app.route("/ppt-builder")
+def ppt_builder():
+    return render_template("ppt-builder.html")
 
 
 @app.route("/api/analyze", methods=["POST"])

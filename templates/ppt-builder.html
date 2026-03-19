@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT Builder | ClaimIQ AI</title>
+  <link rel="stylesheet" href="/static/css/ppt-builder.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  
+  <!-- CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="builder-header">
+    <div class="builder-logo" onclick="window.location.href='/'">
+      🧠 Claim<span>IQ</span> Builder
+    </div>
+    
+    <div class="builder-actions">
+      <select id="template-select" class="query-box" style="margin-top:0; width:150px" onchange="selectTemplate(this.value)">
+        <option value="corporate">Corporate Blue</option>
+        <option value="dark">Modern Dark</option>
+        <option value="minimal">Minimal White</option>
+        <option value="gradient">Gradient Warm</option>
+        <option value="neon">Tech Neon</option>
+      </select>
+      <button class="btn btn-primary" onclick="exportToPPT()">📥 Export .pptx</button>
+    </div>
+  </header>
+
+  <div class="builder-container">
+    
+    <!-- Left Panel: Data & Charts -->
+    <aside class="side-panel">
+      <div class="panel-header">
+        <span>📊 DATA & CHARTS</span>
+        <input type="file" id="file-input" style="display:none" accept=".xlsx,.xlsb,.xls">
+      </div>
+      
+      <div class="panel-content">
+        <div class="upload-btn" onclick="document.getElementById('file-input').click()">
+          <div style="font-size:24px">📂</div>
+          <div style="font-weight:600;margin-top:8px">Upload Excel Data</div>
+          <div style="font-size:12px;opacity:0.6" id="data-status">xlsx, xlsb, xls supported</div>
+        </div>
+
+        <div style="margin-top:24px">
+          <label style="font-size:12px;font-weight:700;opacity:0.6">CHART AI QUERY</label>
+          <textarea id="chart-query" class="query-box" placeholder="e.g. 'hospital vs claims' or 'top 5 diseases by cost'" rows="3"></textarea>
+          <button class="btn btn-secondary" style="width:100%;margin-top:8px;justify-content:center" onclick="generateChartFromQuery()">✨ Generate Chart</button>
+        </div>
+
+        <div class="chart-gallery" id="chart-gallery">
+          <!-- Charts appear here -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center: Canvas Editor -->
+    <main class="canvas-area">
+      <div id="slide-canvas">
+        <!-- Elements will be dropped here -->
+      </div>
+      
+      <div id="loading" class="loading-overlay">
+        <div style="text-align:center">
+          <div style="font-size:32px;animation:spin 2s linear infinite">⚙️</div>
+          <div style="margin-top:10px;font-weight:600">AI is thinking...</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel: AI Assistant -->
+    <aside class="side-panel right">
+      <div class="panel-header">
+        <span>🤖 AI ASSISTANT</span>
+      </div>
+      
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg msg-ai">Hi! I can help you analyze your data or write content for your slides. Try asking "Analyze the cost trends" or "Write a conclusion for Slide 1".</div>
+        </div>
+        
+        <div class="chat-input-area">
+          <textarea id="chat-input" class="query-box" style="margin-top:0" placeholder="Ask AI anything..." rows="1" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat();}"></textarea>
+          <button class="btn btn-primary" style="padding:10px" onclick="sendChat()">🚀</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="/static/js/ppt-builder.js"></script>
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>
