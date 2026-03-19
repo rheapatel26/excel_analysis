@@ -11,6 +11,10 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- CDNs for PPT Builder -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
   <style>
     :root {
       --bg: #080c18;
@@ -598,6 +602,130 @@
       display: none;
       animation: fadeIn 0.4s ease-out;
     }
+
+    /* ── PPT Builder ────────────────────────────────── */
+    #tab-ppt .builder-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      gap: 20px;
+      height: 750px;
+      margin-top: 20px;
+    }
+
+    .canvas-container {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #ppt-canvas {
+      width: 800px;
+      height: 450px; /* 16:9 */
+      background: white;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ppt-sidebar {
+      background: rgba(30, 41, 59, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ppt-sidebar-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .ppt-sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .chart-thumb {
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: grab;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      overflow: hidden;
+    }
+
+    .chart-thumb:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .chart-thumb img {
+      width: 100%;
+      display: block;
+    }
+
+    .draggable-item {
+      position: absolute;
+      cursor: move;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .draggable-item:hover {
+      outline: 2px dashed var(--accent);
+    }
+
+    .draggable-item.selected {
+      outline: 2px solid var(--accent);
+    }
+
+    .draggable-item canvas, .draggable-item img {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .builder-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .tmpl-btn {
+      height: 40px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    .tmpl-btn.active {
+      border-color: var(--accent);
+      background: rgba(108, 143, 255, 0.1);
+      color: var(--text);
+    }
+
 
     .tab-pane.active {
       display: flex;
@@ -1737,8 +1865,8 @@
     </div>
     <div style="display:flex;align-items:center;gap:20px">
       <nav style="display:flex;gap:15px;margin-right:10px">
-        <a href="/" style="color:var(--text);text-decoration:none;font-weight:500;font-size:14px;opacity:0.8" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">Dashboard</a>
-        <a href="/ppt-builder" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:14px;border-bottom:2px solid var(--accent)">PPT Builder</a>
+        <a href="#" onclick="switchTab('tab-overview')" style="color:var(--text);text-decoration:none;font-weight:500;font-size:14px;opacity:0.8" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">Dashboard</a>
+        <a href="#" onclick="switchTab('tab-ppt')" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:14px">PPT Generator</a>
       </nav>
       <div class="header-badge" id="ai-status-badge">● AI-Powered</div>
       <button class="settings-btn" id="settings-cog" onclick="toggleSettings()" title="AI Settings">⚙️</button>
@@ -1829,6 +1957,7 @@
         <div class="tab-link active" onclick="switchTab('tab-overview')">📊 Overview</div>
         <div class="tab-link" onclick="switchTab('tab-chat')">💬 Data Chat</div>
         <div class="tab-link" onclick="switchTab('tab-policy')">📄 Policy AI</div>
+        <div class="tab-link" onclick="switchTab('tab-ppt')">🎬 PPT Generator</div>
       </div>
 
       <!-- Overview Tab -->
@@ -2074,6 +2203,65 @@
         </div>
       </div>
     </div> <!-- End Policy Tab -->
+
+    <!-- PPT Generator Tab -->
+    <div id="tab-ppt" class="tab-pane">
+      <div class="builder-toolbar fade-up">
+        <div style="flex:1; display:flex; gap:10px">
+          <select id="ppt-template" class="ai-input" style="width:180px; margin:0; padding:8px" onchange="applyPPTTemplate(this.value)">
+            <option value="corporate">Corporate Blue</option>
+            <option value="dark">Modern Dark</option>
+            <option value="minimal">Minimal White</option>
+            <option value="gradient">Gradient Warm</option>
+            <option value="neon">Tech Neon</option>
+          </select>
+          <button class="btn btn-secondary" onclick="addTextToPPT()">+ Add Text</button>
+        </div>
+        <button class="btn btn-primary" onclick="exportPPTCanvas()">📥 Export .pptx</button>
+      </div>
+
+      <div class="builder-layout fade-up fade-up-1">
+        <!-- Left: Chart Library -->
+        <aside class="ppt-sidebar">
+          <div class="ppt-sidebar-header">📊 Chart Library</div>
+          <div class="ppt-sidebar-content" id="ppt-library">
+            <div style="text-align:center; padding:20px; color:var(--text3); font-size:12px">
+              Upload Excel to see dashboard charts here
+            </div>
+          </div>
+          <div class="ppt-sidebar-header" style="border-top:1px solid var(--border)">✨ AI Chart Maker</div>
+          <div style="padding:12px">
+            <textarea id="ppt-chart-query" class="ai-input" style="width:100%; margin:0; font-size:12px" placeholder="e.g. 'hospital vs claims'" rows="2"></textarea>
+            <button class="btn btn-secondary" style="width:100%; margin-top:8px; font-size:11px; justify-content:center" onclick="generatePPTChart()">Generate</button>
+          </div>
+        </aside>
+
+        <!-- Center: Canvas -->
+        <main class="canvas-container">
+          <div id="ppt-canvas"></div>
+          <div id="ppt-loading" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100">
+            <div style="text-align:center">
+              <div class="ai-spinner"></div>
+              <div style="margin-top:10px; font-size:12px">AI is working...</div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right: AI Assistant -->
+        <aside class="ppt-sidebar">
+          <div class="ppt-sidebar-header">🤖 Slide Assistant</div>
+          <div class="ppt-sidebar-content" id="ppt-chat-messages" style="display:flex; flex-direction:column; gap:10px">
+            <div style="font-size:12px; opacity:0.7">Ask AI to write slide content or analyze patterns.</div>
+          </div>
+          <div style="padding:12px; border-top:1px solid var(--border)">
+            <div style="display:flex; gap:8px">
+              <textarea id="ppt-chat-input" class="ai-input" style="width:100%; margin:0; font-size:12px" placeholder="Ask AI..." rows="1" onkeydown="if(event.key==='Enter'){event.preventDefault();sendPPTChat();}"></textarea>
+              <button class="btn btn-primary" style="padding:8px" onclick="sendPPTChat()">🚀</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
 
     </section>
   </main>
@@ -3004,8 +3192,27 @@
                 } 
               }
             );
-        } catch(e) { console.error('Status chart failed', e); }
+      } catch(e) { console.error('Status chart failed', e); }
       }
+
+      // Sync with PPT Library
+      const chartIds = [
+        {id: 'chart-type', title: 'Claim Type Distribution'},
+        {id: 'chart-hospital', title: 'Top Hospitals'},
+        {id: 'chart-trend', title: 'Monthly Trend'},
+        {id: 'chart-disease', title: 'Disease Breakdown'},
+        {id: 'chart-age', title: 'Age Distribution'},
+        {id: 'chart-relation', title: 'Relation Breakdown'},
+        {id: 'chart-ipd-dc', title: 'IPD vs Day Care'},
+        {id: 'chart-status', title: 'Status Distribution'}
+      ];
+      
+      const lib = document.getElementById('ppt-library');
+      if (lib) lib.innerHTML = ''; // Clear old thumbs
+      
+      chartIds.forEach(item => {
+        setTimeout(() => addChartToLibrary(item.id, item.title), 1000);
+      });
     }
 
     /* ════════════════════════════════════════════════════
@@ -3515,6 +3722,187 @@
         document.getElementById('rag-send-btn').disabled = false;
       }
     }
+    /* ════════════════════════════════════════════════════
+       PPT Generator (Integrated)
+    ═══════════════════════════════════════════════════════ */
+    let pptElements = [];
+    const pptTemplates = {
+      corporate: { bg: '#ffffff', accent: '#1e293b', text: '#334155' },
+      dark: { bg: '#0f172a', accent: '#6366f1', text: '#f1f5f9' },
+      minimal: { bg: '#f8fafc', accent: '#000000', text: '#334155' },
+      gradient: { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', accent: '#ffffff', text: '#ffffff' },
+      neon: { bg: '#000000', accent: '#00ff00', text: '#ffffff' }
+    };
+    let currentPptTemplate = 'corporate';
+
+    function initPPTInteract() {
+      interact('.draggable-item').draggable({
+        inertia: true,
+        modifiers: [interact.modifiers.restrictRect({ restriction: '#ppt-canvas', endOnly: true })],
+        listeners: { move: (e) => {
+          const t = e.target;
+          const x = (parseFloat(t.getAttribute('data-x')) || 0) + e.dx;
+          const y = (parseFloat(t.getAttribute('data-y')) || 0) + e.dy;
+          t.style.transform = `translate(${x}px, ${y}px)`;
+          t.setAttribute('data-x', x); t.setAttribute('data-y', y);
+        }}
+      }).resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        listeners: { move: (e) => {
+          const t = e.target;
+          let x = (parseFloat(t.getAttribute('data-x')) || 0);
+          let y = (parseFloat(t.getAttribute('data-y')) || 0);
+          t.style.width = e.rect.width + 'px';
+          t.style.height = e.rect.height + 'px';
+          x += e.deltaRect.left; y += e.deltaRect.top;
+          t.style.transform = `translate(${x}px,${y}px)`;
+          t.setAttribute('data-x', x); t.setAttribute('data-y', y);
+        }}
+      });
+    }
+
+    function addChartToLibrary(canvasId, title) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      
+      const lib = document.getElementById('ppt-library');
+      if (lib.innerText.includes('Upload Excel')) lib.innerHTML = '';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'chart-thumb';
+      thumb.title = "Click to add to PPT";
+      
+      const img = new Image();
+      img.src = canvas.toDataURL();
+      thumb.appendChild(img);
+      
+      const label = document.createElement('div');
+      label.style = "font-size:10px; padding:4px; text-align:center; color:#64748b";
+      label.innerText = title || canvasId;
+      thumb.appendChild(label);
+
+      thumb.onclick = () => addToPPTCanvas(img.src, 'chart');
+      lib.appendChild(thumb);
+    }
+
+    function addToPPTCanvas(src, type) {
+      const canvas = document.getElementById('ppt-canvas');
+      const el = document.createElement('div');
+      el.className = 'draggable-item';
+      el.style.width = type === 'chart' ? '300px' : '200px';
+      el.style.height = type === 'chart' ? '200px' : '100px';
+      el.setAttribute('data-type', type);
+
+      if (type === 'chart') {
+        const img = new Image();
+        img.src = src;
+        el.appendChild(img);
+      } else {
+        el.innerText = src || "Enter text...";
+        el.contentEditable = true;
+        el.style.color = pptTemplates[currentPptTemplate].text;
+        el.style.fontSize = "20px";
+        el.style.fontWeight = "600";
+        el.style.padding = "10px";
+      }
+
+      canvas.appendChild(el);
+      initPPTInteract();
+    }
+
+    function addTextToPPT() {
+      addToPPTCanvas("Sample Heading", "text");
+    }
+
+    function applyPPTTemplate(name) {
+      currentPptTemplate = name;
+      const t = pptTemplates[name];
+      const canvas = document.getElementById('ppt-canvas');
+      canvas.style.background = t.bg;
+      document.querySelectorAll('#ppt-canvas .draggable-item[data-type="text"]').forEach(el => {
+        el.style.color = t.text;
+      });
+    }
+
+    async function exportPPTCanvas() {
+      const pptx = new PptxGenJS();
+      const slide = pptx.addSlide();
+      const canvas = document.getElementById('ppt-canvas');
+      const rect = canvas.getBoundingClientRect();
+      const t = pptTemplates[currentPptTemplate];
+
+      if (t.bg.startsWith('linear')) slide.background = { color: '333333' };
+      else slide.background = { color: t.bg.replace('#', '') };
+
+      document.querySelectorAll('#ppt-canvas .draggable-item').forEach(el => {
+        const type = el.getAttribute('data-type');
+        const x = (parseFloat(el.getAttribute('data-x')) || 0) + el.offsetLeft;
+        const y = (parseFloat(el.getAttribute('data-y')) || 0) + el.offsetTop;
+        const opts = {
+          x: (x / rect.width) * 10, y: (y / rect.height) * 5.625,
+          w: (el.offsetWidth / rect.width) * 10, h: (el.offsetHeight / rect.height) * 5.625
+        };
+        if (type === 'chart') slide.addImage({ data: el.querySelector('img').src, ...opts });
+        else slide.addText(el.innerText, { ...opts, color: t.text.replace('#', ''), fontSize: 18 });
+      });
+
+      pptx.writeFile({ fileName: `Claim_Analysis_PPT_${Date.now()}.pptx` });
+    }
+
+    async function generatePPTChart() {
+      const query = document.getElementById('ppt-chart-query').value;
+      if (!query || !allFiles[currentFile]) return;
+      document.getElementById('ppt-loading').style.display = 'flex';
+      try {
+        const fileContent = allFiles[currentFile].data;
+        const headers = Object.keys(fileContent[0]);
+        const prompt = `Excel Columns: [${headers.join(', ')}]. User query: "${query}". Pick chart type (bar, line, pie) and X/Y cols. Return ONLY JSON: {"type":"bar","x":"col","y":"col","title":"Title"}`;
+        const response = await callGemini(prompt);
+        const config = JSON.parse(response.replace(/```json|```/g, '').trim());
+        
+        const labels = fileContent.slice(0, 15).map(r => r[config.x]);
+        const values = fileContent.slice(0, 15).map(r => r[config.y]);
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 400; tempCanvas.height = 300;
+        new Chart(tempCanvas, {
+          type: config.type,
+          data: { labels, datasets: [{ label: config.title, data: values, backgroundColor: '#6c8fff' }] },
+          options: { animation: false }
+        });
+
+        setTimeout(() => {
+          addToPPTCanvas(tempCanvas.toDataURL(), 'chart');
+          document.getElementById('ppt-loading').style.display = 'none';
+        }, 500);
+      } catch (err) {
+        console.error(err); document.getElementById('ppt-loading').style.display = 'none';
+        showToast("Failed to generate chart", "error");
+      }
+    }
+
+    async function sendPPTChat() {
+      const input = document.getElementById('ppt-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      appendPPTMsg('user', text); input.value = '';
+      try {
+        const prompt = `We are designing a PPT for insurance claim analysis. User says: "${text}". Provide useful content or insights to add to a slide. Keep it concise.`;
+        const res = await callGemini(prompt);
+        appendPPTMsg('ai', res);
+      } catch (err) { appendPPTMsg('ai', "Error: " + err.message); }
+    }
+
+    function appendPPTMsg(role, text) {
+      const container = document.getElementById('ppt-chat-messages');
+      const msg = document.createElement('div');
+      msg.className = `msg msg-${role}`;
+      msg.style = "font-size:12px; padding:8px; border-radius:8px; margin-bottom:8px;" + (role==='user'?'background:var(--accent); align-self:flex-end':'background:rgba(255,255,255,0.05); align-self:flex-start');
+      msg.innerText = text;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+    }
+
   </script>
 </body>
 

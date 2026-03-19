@@ -52,11 +52,6 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/ppt-builder")
-def ppt_builder():
-    return render_template("ppt-builder.html")
-
-
 @app.route("/api/analyze", methods=["POST"])
 def analyze_upload():
     print("📢 Analysis request received")
