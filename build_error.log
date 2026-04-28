@@ -1,0 +1,12 @@
+src/App.tsx(34,10): error TS1484: 'AnalysisData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/App.tsx(51,10): error TS6133: 'file' is declared but its value is never read.
+src/components/DataChatTab.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/DataChatTab.tsx(3,10): error TS1484: 'AnalysisData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/DetailsTab.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/DetailsTab.tsx(3,10): error TS1484: 'AnalysisData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/FraudTab.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/FraudTab.tsx(3,10): error TS1484: 'AnalysisData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/Header.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/OverviewTab.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/OverviewTab.tsx(4,10): error TS1484: 'AnalysisData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/PolicyAITab.tsx(1,1): error TS6133: 'React' is declared but its value is never read.

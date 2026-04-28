@@ -86,9 +86,9 @@ def _embed(texts: list[str], api_key: str | None = None, task_type: str = "retri
     if not HAS_GENAI:
         raise RuntimeError("google-generativeai not installed.")
     
-    final_key = api_key or os.getenv('Insure')
+    final_key = api_key or os.getenv('GOOGLE_GENERATIVE_AI_API_KEY')
     if not final_key:
-        raise ValueError("No Gemini API key provided for embeddings. Add 'Insure=...' to .env.")
+        raise ValueError("No Gemini API key provided for embeddings. Add 'GOOGLE_GENERATIVE_AI_API_KEY=...' to .env.")
         
     genai.configure(api_key=final_key)
     embeddings = []

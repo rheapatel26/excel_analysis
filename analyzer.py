@@ -7,30 +7,38 @@ import pandas as pd
 import numpy as np
 import os
 import re
+import logging
 from datetime import datetime
+
+# Setup local logger
+logger = logging.getLogger("ClaimIQ.Analyzer")
+
+class MappingError(Exception):
+    """Raised when critical columns cannot be mapped in the Excel file."""
+    pass
 
 
 # ─── Column role aliases ──────────────────────────────────────────────────────
 ALIASES = {
     # exact real column names listed first for priority
-    "claim_id":      ["claim no", "claim reference", "claim ref", "claimno", "claim_id",
+    "claim_id":      ["claim_number", "ccn_no", "claim no", "claim reference", "claim ref", "claimno", "claim_id",
                       "claim number", "claimnumber", "sr no", "serial no", "s.no",
-                      "claim id", "reference no", "ref no", "claim sl no"],
-    "employee_name": ["employee name", "insured", "insured name", "member name",
+                      "claim id", "reference no", "ref no", "claim sl no", "claim_nu", "claim_num"],
+    "employee_name": ["patient_name", "insured", "employee name", "member name",
                       "employee_name", "patient name", "name of insured", "name",
                       "claimant name", "policyholder name", "member"],
     # 'Hospital' exact match first; 'Hospital Type' is blocklisted inside _find_col
-    "hospital":      ["hospital", "hospital name", "provider name", "facility name",
+    "hospital":      ["hospital_name", "hospital", "provider name", "facility name",
                       "hospitalname", "hospital_name", "name of hospital",
                       "service provider", "network hospital"],
-    "city":          ["city", "claim location", "hospital city", "location",
+    "city":          ["hospital_city", "city", "claim location", "hospital city", "location",
                       "city name", "hospital location"],
-    "state":         ["state", "hospital state", "statename", "state name"],
-    "claim_type":    ["claim type", "claimtype", "type of claim", "claim_type",
+    "state":         ["hospital_state", "state", "hospital state", "statename", "state name"],
+    "claim_type":    ["ccn_type_name", "claim type", "claimtype", "type of claim", "claim_type",
                       "reimbursement or cashless", "type", "cashless/reimbursement",
                       "cashless or reimbursement", "claim category"],
     # Pay Status / Claim Close Status are the settled/rejected flags in the MIS
-    "status":        ["pay status", "claim close status", "claim status", "final claim status",
+    "status":        ["final_claim_status", "pay status", "claim close status", "claim status", "final claim status",
                       "final status", "claim_status", "decision", "settlement status", "status",
                       "current status", "claim decision", "approval status"],
     "incurred_amt":  ["incurred_amt", "incurred amt", "incurred amount", "ic_amt",
@@ -43,22 +51,22 @@ ALIASES = {
                       "disbursed amount", "approved amt", "paid amt",
                       "claim value", "settlement amount", "total paid"],
     # 'Total Bill' exact match; blocklist 'Hospital Bill No'
-    "billed_amt":    ["total bill", "claimed amt", "billed amount", "bill amount",
+    "billed_amt":    ["claimed_amount", "total_bill_amt_recd", "total bill", "claimed amt", "billed amount", "bill amount",
                       "total bill amount", "gross amount", "hospital billed amount",
                       "claimed amount", "initial claimed amount", "total claimed",
                       "sum claimed", "billed amt", "hospital bill amount",
                       "estimated amount", "pre auth amount", "preauth amount"],
-    "admission_date":["actual doa", "expected doa", "admission date", "date of admission",
+    "admission_date":["dateof_admission", "actual doa", "expected doa", "admission date", "date of admission",
                       "doa", "hospitalization date", "admission_date", "treatment from date",
                       "date of hospitalization", "claim date", "intimation date",
                       "date of loss", "loss date", "event date", "date",
                       "from date", "treatment date", "registration date",
                       "claim intimation date", "date of claim"],
-    "discharge_date":["actual dod", "expected dod", "discharge date", "date of discharge",
+    "discharge_date":["dateof_discharge", "actual dod", "expected dod", "discharge date", "date of discharge",
                       "dod", "discharge_date", "treatment to date",
                       "to date", "date of discharge from hospital"],
-    "icd_code":      ["icd code", "icd_code", "diagnosis code", "icd10", "icd 10"],
-    "diagnosis":     ["provisional diagnosis", "final diagnosis", "diagnosis", "disease",
+    "icd_code":      ["icd_code_level_1", "icd code", "icd_code", "diagnosis code", "icd10", "icd 10"],
+    "diagnosis":     ["final_diagnosis", "provisional diagnosis", "diagnosis", "disease",
                       "ailment", "diagnosis name", "disease name", "primary diagnosis",
                       "nature of illness", "nature of disease", "ailment description",
                       "cause", "cause of claim", "peril"],
@@ -112,46 +120,48 @@ _BLOCKLIST = {
     "bill no", "claim no.", "hospital id", "hospital qualifier",
 }
 
-def _find_col(df: pd.DataFrame, role: str) -> str | None:
+def _find_col(df: pd.DataFrame, role: str):
     """Return first column name matching role aliases, exact-match first then substring."""
-    targets = [a.lower() for a in ALIASES.get(role, [])]
-    cols_lower = {str(c).lower().strip(): c for c in df.columns}
+    targets = [a.lower().strip() for a in ALIASES.get(role, [])]
+    # Normalize current columns: strip, lower, and remove internal extra spaces
+    cols_normalized = {re.sub(r'\s+', ' ', str(c).lower().strip()): c for c in df.columns}
+    
     # 1) Exact match (highest priority)
     for t in targets:
-        if t in cols_lower and t not in _BLOCKLIST:
-            return cols_lower[t]
-    # 2) Substring match — target string appears inside column name
+        if t in cols_normalized and t not in _BLOCKLIST:
+            return cols_normalized[t]
+            
+    # 2) Partial match (contains target string)
     for t in targets:
-        for col_low, col_orig in cols_lower.items():
-            if col_low in _BLOCKLIST:
-                continue
-            if t == col_low or (len(t) > 4 and t in col_low):
+        if len(t) < 3: continue 
+        for col_norm, col_orig in cols_normalized.items():
+            if t in col_norm and col_norm not in _BLOCKLIST:
                 return col_orig
-    # 3) Fuzzy fallback — column name contains key terms for critical roles
-    _ROLE_KEYWORDS = {
-        "incurred_amt": ["amount", "amt", "paid", "payable", "incurred", "claim"],
-        "admission_date": ["date", "doa", "admission"],
-        "billed_amt": ["bill", "claimed", "gross"],
-    }
-    keywords = _ROLE_KEYWORDS.get(role, [])
-    if keywords:
-        for col_low, col_orig in cols_lower.items():
-            if col_low in _BLOCKLIST:
-                continue
-            for kw in keywords:
-                if kw in col_low and col_low not in ["claim no", "claim type", "claim status",
-                    "claim id", "claim number", "claim ref", "claim category",
-                    "amount type", "date of birth", "dob", "bill no", "bill number"]:
-                    return col_orig
+                
+    # 3) Semantic fallbacks for critical financial/date roles
+    if role == "incurred_amt":
+        # Look for columns with 'amt', 'paid', or 'settled' if nothing found
+        for col_norm, col_orig in cols_normalized.items():
+            if any(k in col_norm for k in ["paid", "payable", "incurred", "settled", "auth"]) and "bill" not in col_norm:
+                return col_orig
+    elif role == "admission_date":
+        for col_norm, col_orig in cols_normalized.items():
+            if any(k in col_norm for k in ["doa", "admission", "hosp", "date"]) and "discharge" not in col_norm:
+                return col_orig
+                
     return None
 
 
 def _to_numeric(series: pd.Series) -> pd.Series:
+    if series.dtype == object:
+        # Strip commas and whitespace before conversion
+        clean_series = series.astype(str).str.replace(r'[^\d.]', '', regex=True)
+        return pd.to_numeric(clean_series, errors="coerce").fillna(0)
     return pd.to_numeric(series, errors="coerce").fillna(0)
 
 
 def _to_date(series: pd.Series) -> pd.Series:
-    return pd.to_datetime(series, errors="coerce", dayfirst=False)
+    return pd.to_datetime(series, errors="coerce", dayfirst=True)
 
 
 def _icd_chapter(code: str) -> str:
@@ -187,13 +197,47 @@ def _is_chronic(diagnosis: str) -> bool:
 def read_file(path: str) -> dict[str, pd.DataFrame]:
     """Read Excel file and return {sheet_name: DataFrame}."""
     ext = os.path.splitext(path)[1].lower()
-    engine = "pyxlsb" if ext == ".xlsb" else None
-    xl = pd.ExcelFile(path, engine=engine)
+    
+    # Check if html disguised as xls
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            head = f.read(2048).lower()
+            if "<html" in head or "<table" in head or "<?xml" in head and "<workbook" not in head:
+                dfs = pd.read_html(path)
+                if dfs: return {"Sheet1": dfs[0]}
+    except Exception:
+        pass
+
+    engine = "pyxlsb" if ext == ".xlsb" else ("openpyxl" if ext == ".xlsx" else "xlrd")
+    
+    try:
+        xl = pd.ExcelFile(path, engine=engine)
+    except (ValueError, Exception) as e:
+        # Fallback for CSV/TSV files mislabeled as .xls (very common)
+        try:
+            # Try aggressive auto-delimiter and encoding detection
+            for enc in ['utf-8', 'latin1', 'cp1252', 'utf-16']:
+                try:
+                    df = pd.read_csv(path, sep=None, engine='python', encoding=enc)
+                    if len(df.columns) > 3:
+                        return {"Sheet1": df}
+                except:
+                    continue
+        except:
+            pass
+            
+        if "Excel file format cannot be determined" in str(e) or "Expected BOF record" in str(e):
+            try:
+                dfs = pd.read_html(path)
+                if dfs: return {"Sheet1": dfs[0]}
+            except Exception:
+                pass
+        raise e
+
     sheets = {}
     for name in xl.sheet_names:
         try:
             raw = xl.parse(name, header=None)
-            # Find the header row: first row with ≥ 6 non-null string-ish cells
             header_row = 0
             for i, row in raw.iterrows():
                 non_null = row.dropna()
@@ -231,14 +275,20 @@ def kpis(df: pd.DataFrame, cols: dict) -> dict:
     avg_claim = float(incurred.mean()) if total_claims > 0 else 0.0
     max_claim = float(incurred.max()) if total_claims > 0 else 0.0
 
-    # Cashless %
+    # Cashless % - Smart detection
     type_col = cols.get("claim_type")
-    cashless_count = 0
-    reimb_count = 0
+    ipd_col = next((c for c in df.columns if "IPD" in str(c) and "/" in str(c)), None)
+    
+    cashless_mask = pd.Series([False] * len(df))
     if type_col:
-        types = df[type_col].astype(str).str.upper()
-        cashless_count = int((types.str.contains("CASHLESS")).sum())
-        reimb_count = int((types.str.contains("REIMB")).sum())
+        cashless_mask |= df[type_col].astype(str).str.upper().str.contains("CASHLESS", na=False)
+    
+    # Smart Fallback: IPD/Day Care are almost always cashless in institutional reports
+    if ipd_col:
+        cashless_mask |= df[ipd_col].astype(str).str.upper().isin(["IPD", "DAY CARE", "DAYCARE"])
+        
+    cashless_count = int(cashless_mask.sum())
+    reimb_count = total_claims - cashless_count
     cashless_pct = round(cashless_count / total_claims * 100, 1) if total_claims > 0 else 0
 
     # Approval rate
@@ -247,10 +297,12 @@ def kpis(df: pd.DataFrame, cols: dict) -> dict:
     rejected_count = 0
     if status_col:
         statuses = df[status_col].astype(str).str.upper()
+        # Institutional approvals: Paid, Settled, Authorised, AL Issued, Closed with payment
         approved_count = int((statuses.str.contains(
-            r"APPROVED|SETTLED|PAID|CLOSED WITH PAY|WITH PAY|APPROVE", regex=True)).sum())
+            r"APPROVED|SETTLED|PAID|AUTHORISED|AL ISSUED|CLOSED WITH PAY|WITH PAY|APPROVE", regex=True)).sum())
+        # Institutional rejections: Denial, Repudiated, Rejected, Closed without payment
         rejected_count = int((statuses.str.contains(
-            r"REJECT|REPUDIAT|WITHOUT PAY|DENIED|CLOSED WITHOUT", regex=True)).sum())
+            r"REJECT|REPUDIAT|WITHOUT PAY|DENIED|DENIAL|CLOSED WITHOUT", regex=True)).sum())
     approval_rate = round(approved_count / total_claims * 100, 1) if total_claims > 0 else 0
 
     # Deductions
@@ -543,10 +595,21 @@ def status_distribution(df: pd.DataFrame, cols: dict) -> list:
 
 def claim_type_dist(df: pd.DataFrame, cols: dict) -> list:
     type_col = cols.get("claim_type")
-    if not type_col:
-        return []
-    dist = df[type_col].astype(str).str.strip().str.upper().value_counts()
-    return [{"type": k, "count": int(v)} for k, v in dist.items() if k.lower() not in ["nan", "none"]]
+    ipd_col = next((c for c in df.columns if "IPD" in str(c) and "/" in str(c)), None)
+    
+    cashless_mask = pd.Series([False] * len(df))
+    if type_col:
+        cashless_mask |= df[type_col].astype(str).str.upper().str.contains("CASHLESS", na=False)
+    if ipd_col:
+        cashless_mask |= df[ipd_col].astype(str).str.upper().isin(["IPD", "DAY CARE", "DAYCARE"])
+        
+    cashless_count = int(cashless_mask.sum())
+    reimb_count = len(df) - cashless_count
+    
+    return [
+        {"type": "CASHLESS", "count": cashless_count},
+        {"type": "REIMBURSEMENT", "count": reimb_count}
+    ]
 
 
 def gender_breakdown(df: pd.DataFrame, cols: dict) -> list:
@@ -723,44 +786,13 @@ def _detect_body_part(row: pd.Series, icd_col: str, diag_col: str) -> str:
     return mapping.get(letter, "body")
 
 
-def get_details_table(df: pd.DataFrame, cols: dict, max_rows: int = 500) -> list:
-    """Return claim rows with all columns and body part detection."""
-    icd_col = cols.get("icd_code")
-    diag_col = cols.get("diagnosis")
-    
-    # Define which columns to show in summary
-    summary_roles = ["claim_id", "employee_name", "hospital", "city", "claim_type",
-                     "status", "incurred_amt", "billed_amt", "admission_date", "diagnosis", "reason"]
-    
-    rows = []
-    for idx, row in df.head(max_rows).iterrows():
-        # Core summary fields
-        entry = {}
-        for role in summary_roles:
-            col_name = cols.get(role)
-            val = row.get(col_name, "—") if col_name else "—"
-            if isinstance(val, float) and np.isnan(val): val = "—"
-            entry[role] = val
-            
-        # Add index for reference
-        entry["_idx"] = idx
-        
-        # Detect body part
-        entry["body_part"] = _detect_body_part(row, icd_col, diag_col)
-        
-        # Add ALL columns for the full view
-        entry["all_details"] = {str(k): str(v) for k, v in row.dropna().to_dict().items() if str(k) not in _BLOCKLIST}
-        
-        # Numeric conversions for formatting
-        for role in ["incurred_amt", "billed_amt"]:
-            if role in entry and entry[role] != "—":
-                try:
-                    entry[role] = float(entry[role])
-                except Exception:
-                    entry[role] = 0.0
-        
-        rows.append(entry)
-    return rows
+def get_details_table(df: pd.DataFrame, cols: dict, max_rows: int = 1000) -> list:
+    """Return all columns for the first N rows for the audit ledger."""
+    # Replace NaNs with empty strings for JSON compatibility
+    subset = df.head(max_rows).copy().fillna("")
+    # Ensure all column names are strings for JSON keys
+    subset.columns = [str(c) for c in subset.columns]
+    return subset.to_dict(orient="records")
 
 
 # ─── Top-level entry point ────────────────────────────────────────────────────
@@ -775,13 +807,22 @@ def analyze(path: str) -> dict:
     # Auto-detect columns
     cols = {role: _find_col(df, role) for role in ALIASES}
 
-    # Diagnostic logging for production debugging
-    detected = {k: v for k, v in cols.items() if v}
-    missing = [k for k, v in cols.items() if not v]
-    print(f"📊 Detected {len(detected)} columns: {detected}")
-    if missing:
-        print(f"⚠️ Missing roles: {missing}")
-    print(f"📋 Available columns: {list(df.columns)}")
+    # ── Strict Validation ─────────────────────────────────────────────────────
+    # We require at least these 3 roles for any meaningful analysis
+    critical_roles = ["claim_id", "incurred_amt", "admission_date"]
+    missing_critical = [r for r in critical_roles if not cols.get(r)]
+    
+    if missing_critical:
+        readable = [r.replace('_', ' ').title() for r in missing_critical]
+        raise MappingError(
+            f"Missing required columns: {', '.join(readable)}. "
+            "Please ensure your Excel file contains these headers (or close matches)."
+        )
+
+    # Diagnostic logging
+    detected_count = sum(1 for v in cols.values() if v)
+    logger.info(f"📊 Column Mapping: Detected {detected_count} out of {len(ALIASES)} known roles.")
+    logger.info(f"📋 Available columns in sheet: {list(df.columns)}")
 
     # Run all analyses
     kpi = kpis(df, cols)

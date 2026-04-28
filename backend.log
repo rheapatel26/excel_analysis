@@ -1,0 +1,90 @@
+2026-04-27 16:16:25,985 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+ * Serving Flask app 'app'
+ * Debug mode: on
+2026-04-27 16:16:26,009 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.94:5001
+2026-04-27 16:16:26,010 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-27 16:16:26,010 - INFO -  * Restarting with stat
+2026-04-27 16:16:26,458 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 16:16:26,477 - WARNING -  * Debugger is active!
+2026-04-27 16:16:26,493 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 16:17:02,774 - INFO - 📢 Analysis request received
+2026-04-27 16:17:02,781 - INFO - 📂 Processing file: ALKEM LABORATORIES LIMITED_ClaimReport_2026-03-30_16_54_49.xls (ext: .xls)
+2026-04-27 16:17:02,786 - INFO - 💾 Saved to temp: /var/folders/7n/ttyjzxl13sx2gpjh0js1072m0000gn/T/tmpze9j3w1r.xls
+2026-04-27 16:17:02,786 - INFO - 🔍 Running analysis engine...
+2026-04-27 16:17:02,880 - INFO - 📊 Column Mapping: Detected 16 out of 20 known roles.
+2026-04-27 16:17:02,880 - INFO - 📋 Available columns in sheet: ['CLAIM_NUMBER', 'MEMBER_CODE', 'PATIENT_NAME', 'INSURED', 'AGE', 'GENDER', 'RELATION_NAME', 'EMPLOYEE_CODE', 'EMPLOYEE_LOCATION', 'GROUP_NAME-Y_NO', 'POLICY_TYPE', 'POLICY_NO', 'VALID_FROM', 'VALID_TILL', 'MAIN_CLAIM', 'SUM_INSURED', 'GROUP_NAME', 'CCN_NO', 'CCN_EXT', 'CCN_DATE', 'CCN_TYPE_NAME', 'FINAL_DIAGNOSIS', 'HOSPITAL_NAME', 'PROVIDER_NO', 'HOSPITAL_NETWORK_TYPE', 'HOSPITAL_CITY', 'HOSPITAL_STATE', 'LIKELY_DOA', 'DATEOF_ADMISSION', 'DATEOF_DISCHARGE', 'AL_AMOUNT', 'AL_DATE', 'DISEASE_NAME_LEVEL_I', 'ICD_CODE_LEVEL_1', 'INTIMATED_AMOUNT', 'TOTAL_BILL_AMT_RECD', 'NOT_PAYBLE_AMOUNT', 'DISCOUNT_AMOUNT', 'TDS_AMOUNT', 'SERVICE_TAX', 'DATE_OF_FILE_RECEIVED', 'REOPEN_DATE', 'DEFICIENT_DATE', 'DEFICIENCY_RETRIVAL_DATE', 'AUTHORISED_DATE', 'MED_STATUS', 'DO_NAME', 'RO_NAME', 'INSURANCE_CO_NAME', 'CHEQUE_NO', 'FLOAT_NO', 'FLOAT_DATE', 'PAYEE_NAME', 'DEFICIENCY_DETAILS', 'REJECTION_CLOSED_DATE', 'FINAL_CLAIM_STATUS', 'SUB_STATUS', 'CLOSED_REASON', 'CLAIMED_AMOUNT', 'INCURRED_AMT', 'AMOUNT', 'PENDING REASON', 'DISEASE_NAME_LEVEL_II', 'DISEASE_NAME_LEVEL_III', 'HR PAID BY LOCATION', 'ICD_CODE_LEVEL_II', 'ICD_CODE_LEVEL_III', 'IPD/ OPD', 'PAYMETDATE', 'REASON FOR DEDUCTION', 'REPUDATION DETAILS', 'Unnamed: 71']
+/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py:162: UserWarning: Parsing dates in %d/%m/%Y format when dayfirst=False (the default) was specified. Pass `dayfirst=True` or specify a format to silence this warning.
+  return pd.to_datetime(series, errors="coerce", dayfirst=False)
+2026-04-27 16:17:03,112 - INFO - ✅ Analysis engine finished
+2026-04-27 16:17:03,112 - INFO - ⚙️ Caching DataFrame for chat...
+2026-04-27 16:17:03,202 - INFO - 127.0.0.1 - - [27/Apr/2026 16:17:03] "POST /api/analyze HTTP/1.1" 200 -
+2026-04-27 16:19:29,348 - INFO - 📢 Analysis request received
+2026-04-27 16:19:29,355 - INFO - 📂 Processing file: ALKEM LABORATORIES LIMITED_ClaimReport_2026-03-30_16_54_49.xls (ext: .xls)
+2026-04-27 16:19:29,358 - INFO - 💾 Saved to temp: /var/folders/7n/ttyjzxl13sx2gpjh0js1072m0000gn/T/tmp8_1g467v.xls
+2026-04-27 16:19:29,358 - INFO - 🔍 Running analysis engine...
+2026-04-27 16:19:29,446 - INFO - 📊 Column Mapping: Detected 16 out of 20 known roles.
+2026-04-27 16:19:29,447 - INFO - 📋 Available columns in sheet: ['CLAIM_NUMBER', 'MEMBER_CODE', 'PATIENT_NAME', 'INSURED', 'AGE', 'GENDER', 'RELATION_NAME', 'EMPLOYEE_CODE', 'EMPLOYEE_LOCATION', 'GROUP_NAME-Y_NO', 'POLICY_TYPE', 'POLICY_NO', 'VALID_FROM', 'VALID_TILL', 'MAIN_CLAIM', 'SUM_INSURED', 'GROUP_NAME', 'CCN_NO', 'CCN_EXT', 'CCN_DATE', 'CCN_TYPE_NAME', 'FINAL_DIAGNOSIS', 'HOSPITAL_NAME', 'PROVIDER_NO', 'HOSPITAL_NETWORK_TYPE', 'HOSPITAL_CITY', 'HOSPITAL_STATE', 'LIKELY_DOA', 'DATEOF_ADMISSION', 'DATEOF_DISCHARGE', 'AL_AMOUNT', 'AL_DATE', 'DISEASE_NAME_LEVEL_I', 'ICD_CODE_LEVEL_1', 'INTIMATED_AMOUNT', 'TOTAL_BILL_AMT_RECD', 'NOT_PAYBLE_AMOUNT', 'DISCOUNT_AMOUNT', 'TDS_AMOUNT', 'SERVICE_TAX', 'DATE_OF_FILE_RECEIVED', 'REOPEN_DATE', 'DEFICIENT_DATE', 'DEFICIENCY_RETRIVAL_DATE', 'AUTHORISED_DATE', 'MED_STATUS', 'DO_NAME', 'RO_NAME', 'INSURANCE_CO_NAME', 'CHEQUE_NO', 'FLOAT_NO', 'FLOAT_DATE', 'PAYEE_NAME', 'DEFICIENCY_DETAILS', 'REJECTION_CLOSED_DATE', 'FINAL_CLAIM_STATUS', 'SUB_STATUS', 'CLOSED_REASON', 'CLAIMED_AMOUNT', 'INCURRED_AMT', 'AMOUNT', 'PENDING REASON', 'DISEASE_NAME_LEVEL_II', 'DISEASE_NAME_LEVEL_III', 'HR PAID BY LOCATION', 'ICD_CODE_LEVEL_II', 'ICD_CODE_LEVEL_III', 'IPD/ OPD', 'PAYMETDATE', 'REASON FOR DEDUCTION', 'REPUDATION DETAILS', 'Unnamed: 71']
+/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py:162: UserWarning: Parsing dates in %d/%m/%Y format when dayfirst=False (the default) was specified. Pass `dayfirst=True` or specify a format to silence this warning.
+  return pd.to_datetime(series, errors="coerce", dayfirst=False)
+2026-04-27 16:19:29,673 - INFO - ✅ Analysis engine finished
+2026-04-27 16:19:29,673 - INFO - ⚙️ Caching DataFrame for chat...
+2026-04-27 16:19:29,765 - INFO - 127.0.0.1 - - [27/Apr/2026 16:19:29] "POST /api/analyze HTTP/1.1" 200 -
+2026-04-27 17:05:47,043 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/llm_agent.py', reloading
+2026-04-27 17:05:47,194 - INFO -  * Restarting with stat
+2026-04-27 17:05:47,870 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 17:05:47,889 - WARNING -  * Debugger is active!
+2026-04-27 17:05:47,899 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 17:54:51,712 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py', reloading
+2026-04-27 17:54:51,855 - INFO -  * Restarting with stat
+2026-04-27 17:54:52,506 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 17:54:52,526 - WARNING -  * Debugger is active!
+2026-04-27 17:54:52,536 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 17:55:43,346 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py', reloading
+2026-04-27 17:55:43,479 - INFO -  * Restarting with stat
+2026-04-27 17:55:43,936 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 17:55:43,952 - WARNING -  * Debugger is active!
+2026-04-27 17:55:43,960 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 17:55:49,129 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py', reloading
+2026-04-27 17:55:49,249 - INFO -  * Restarting with stat
+2026-04-27 17:55:49,708 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 17:55:49,724 - WARNING -  * Debugger is active!
+2026-04-27 17:55:49,732 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 17:57:17,988 - INFO - 📢 Analysis request received
+2026-04-27 17:57:17,995 - INFO - 📂 Processing file: ALKEM LABORATORIES LIMITED_ClaimReport_2026-03-30_16_54_49.xls (ext: .xls)
+2026-04-27 17:57:17,997 - INFO - 💾 Saved to temp: /var/folders/7n/ttyjzxl13sx2gpjh0js1072m0000gn/T/tmp90t1d6vj.xls
+2026-04-27 17:57:17,997 - INFO - 🔍 Running analysis engine...
+2026-04-27 17:57:18,080 - INFO - 📊 Column Mapping: Detected 18 out of 20 known roles.
+2026-04-27 17:57:18,080 - INFO - 📋 Available columns in sheet: ['CLAIM_NUMBER', 'MEMBER_CODE', 'PATIENT_NAME', 'INSURED', 'AGE', 'GENDER', 'RELATION_NAME', 'EMPLOYEE_CODE', 'EMPLOYEE_LOCATION', 'GROUP_NAME-Y_NO', 'POLICY_TYPE', 'POLICY_NO', 'VALID_FROM', 'VALID_TILL', 'MAIN_CLAIM', 'SUM_INSURED', 'GROUP_NAME', 'CCN_NO', 'CCN_EXT', 'CCN_DATE', 'CCN_TYPE_NAME', 'FINAL_DIAGNOSIS', 'HOSPITAL_NAME', 'PROVIDER_NO', 'HOSPITAL_NETWORK_TYPE', 'HOSPITAL_CITY', 'HOSPITAL_STATE', 'LIKELY_DOA', 'DATEOF_ADMISSION', 'DATEOF_DISCHARGE', 'AL_AMOUNT', 'AL_DATE', 'DISEASE_NAME_LEVEL_I', 'ICD_CODE_LEVEL_1', 'INTIMATED_AMOUNT', 'TOTAL_BILL_AMT_RECD', 'NOT_PAYBLE_AMOUNT', 'DISCOUNT_AMOUNT', 'TDS_AMOUNT', 'SERVICE_TAX', 'DATE_OF_FILE_RECEIVED', 'REOPEN_DATE', 'DEFICIENT_DATE', 'DEFICIENCY_RETRIVAL_DATE', 'AUTHORISED_DATE', 'MED_STATUS', 'DO_NAME', 'RO_NAME', 'INSURANCE_CO_NAME', 'CHEQUE_NO', 'FLOAT_NO', 'FLOAT_DATE', 'PAYEE_NAME', 'DEFICIENCY_DETAILS', 'REJECTION_CLOSED_DATE', 'FINAL_CLAIM_STATUS', 'SUB_STATUS', 'CLOSED_REASON', 'CLAIMED_AMOUNT', 'INCURRED_AMT', 'AMOUNT', 'PENDING REASON', 'DISEASE_NAME_LEVEL_II', 'DISEASE_NAME_LEVEL_III', 'HR PAID BY LOCATION', 'ICD_CODE_LEVEL_II', 'ICD_CODE_LEVEL_III', 'IPD/ OPD', 'PAYMETDATE', 'REASON FOR DEDUCTION', 'REPUDATION DETAILS', 'Unnamed: 71']
+2026-04-27 17:57:19,409 - INFO - ✅ Analysis engine finished
+2026-04-27 17:57:19,410 - INFO - ⚙️ Caching DataFrame for chat...
+2026-04-27 17:57:19,501 - INFO - 127.0.0.1 - - [27/Apr/2026 17:57:19] "POST /api/analyze HTTP/1.1" 200 -
+2026-04-27 18:21:40,853 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py', reloading
+2026-04-27 18:21:41,000 - INFO -  * Restarting with stat
+2026-04-27 18:21:41,600 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 18:21:41,619 - WARNING -  * Debugger is active!
+2026-04-27 18:21:41,629 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 18:23:03,422 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py', reloading
+2026-04-27 18:23:03,561 - INFO -  * Restarting with stat
+2026-04-27 18:23:04,204 - INFO - 🚀 Claim Intelligence Platform starting on http://localhost:5001
+2026-04-27 18:23:04,223 - WARNING -  * Debugger is active!
+2026-04-27 18:23:04,231 - INFO -  * Debugger PIN: 452-844-216
+2026-04-27 18:24:41,652 - INFO - 📢 Analysis request received
+2026-04-27 18:24:41,660 - INFO - 📂 Processing file: ALKEM LABORATORIES LIMITED_ClaimReport_2026-03-30_16_54_49.xls (ext: .xls)
+2026-04-27 18:24:41,663 - INFO - 💾 Saved to temp: /var/folders/7n/ttyjzxl13sx2gpjh0js1072m0000gn/T/tmpop77cs4v.xls
+2026-04-27 18:24:41,663 - INFO - 🔍 Running analysis engine...
+2026-04-27 18:24:41,752 - INFO - 📊 Column Mapping: Detected 18 out of 20 known roles.
+2026-04-27 18:24:41,752 - INFO - 📋 Available columns in sheet: ['CLAIM_NUMBER', 'MEMBER_CODE', 'PATIENT_NAME', 'INSURED', 'AGE', 'GENDER', 'RELATION_NAME', 'EMPLOYEE_CODE', 'EMPLOYEE_LOCATION', 'GROUP_NAME-Y_NO', 'POLICY_TYPE', 'POLICY_NO', 'VALID_FROM', 'VALID_TILL', 'MAIN_CLAIM', 'SUM_INSURED', 'GROUP_NAME', 'CCN_NO', 'CCN_EXT', 'CCN_DATE', 'CCN_TYPE_NAME', 'FINAL_DIAGNOSIS', 'HOSPITAL_NAME', 'PROVIDER_NO', 'HOSPITAL_NETWORK_TYPE', 'HOSPITAL_CITY', 'HOSPITAL_STATE', 'LIKELY_DOA', 'DATEOF_ADMISSION', 'DATEOF_DISCHARGE', 'AL_AMOUNT', 'AL_DATE', 'DISEASE_NAME_LEVEL_I', 'ICD_CODE_LEVEL_1', 'INTIMATED_AMOUNT', 'TOTAL_BILL_AMT_RECD', 'NOT_PAYBLE_AMOUNT', 'DISCOUNT_AMOUNT', 'TDS_AMOUNT', 'SERVICE_TAX', 'DATE_OF_FILE_RECEIVED', 'REOPEN_DATE', 'DEFICIENT_DATE', 'DEFICIENCY_RETRIVAL_DATE', 'AUTHORISED_DATE', 'MED_STATUS', 'DO_NAME', 'RO_NAME', 'INSURANCE_CO_NAME', 'CHEQUE_NO', 'FLOAT_NO', 'FLOAT_DATE', 'PAYEE_NAME', 'DEFICIENCY_DETAILS', 'REJECTION_CLOSED_DATE', 'FINAL_CLAIM_STATUS', 'SUB_STATUS', 'CLOSED_REASON', 'CLAIMED_AMOUNT', 'INCURRED_AMT', 'AMOUNT', 'PENDING REASON', 'DISEASE_NAME_LEVEL_II', 'DISEASE_NAME_LEVEL_III', 'HR PAID BY LOCATION', 'ICD_CODE_LEVEL_II', 'ICD_CODE_LEVEL_III', 'IPD/ OPD', 'PAYMETDATE', 'REASON FOR DEDUCTION', 'REPUDATION DETAILS', 'Unnamed: 71']
+2026-04-27 18:24:43,045 - INFO - ✅ Analysis engine finished
+2026-04-27 18:24:43,045 - INFO - ⚙️ Caching DataFrame for chat...
+2026-04-27 18:24:43,137 - INFO - 127.0.0.1 - - [27/Apr/2026 18:24:43] "POST /api/analyze HTTP/1.1" 200 -
+2026-04-27 18:25:34,021 - INFO -  * Detected change in '/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py', reloading
+2026-04-27 18:25:34,198 - INFO -  * Restarting with stat
+Traceback (most recent call last):
+  File "/Users/adityaladge/Documents/Share India/Projects/excel_analysis/app.py", line 16, in <module>
+    from analyzer import analyze, MappingError
+  File "/Users/adityaladge/Documents/Share India/Projects/excel_analysis/analyzer.py", line 153
+    "claim id", "claim number", "claim ref", "claim category",
+IndentationError: unexpected indent

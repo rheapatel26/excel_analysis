@@ -29,9 +29,9 @@ TABLE_HEADER_BG = RGBColor(0x1E, 0x29, 0x3B)
 TABLE_ALT_BG = RGBColor(0xF8, 0xFA, 0xFC)
 SLIDE_BG = BG_GRAY
 
-# Slide dimensions (widescreen 16:9)
-SLIDE_WIDTH = Emu(16256000)
-SLIDE_HEIGHT = Emu(9144000)
+# Slide dimensions (widescreen 16:9 standard - 13.333 x 7.5 inches)
+SLIDE_WIDTH = Emu(12192000)
+SLIDE_HEIGHT = Emu(6858000)
 
 
 def _fmt_inr(amount):
@@ -51,12 +51,19 @@ def _fmt_inr_full(amount):
     return f"₹{amount:,.0f}"
 
 
+BG_GRAY = RGBColor(0xF8, 0xFA, 0xFC)  # Lighter, premium slate gray
+SLIDE_BG = BG_GRAY
+
 def _set_slide_bg(slide, color=SLIDE_BG):
     """Set solid background fill for a slide."""
     bg = slide.background
     fill = bg.fill
     fill.solid()
     fill.fore_color.rgb = color
+    
+    # Premium branding accent line across the top of every slide
+    _add_shape_rect(slide, Inches(0), Inches(0), SLIDE_WIDTH, Inches(0.08), fill_color=NAVY)
+    _add_shape_rect(slide, Inches(0), Inches(0.08), SLIDE_WIDTH, Inches(0.02), fill_color=ACCENT_BLUE)
 
 
 def _add_textbox(slide, left, top, width, height, text, font_size=12,
@@ -181,11 +188,11 @@ def _add_table(slide, left, top, width, headers, rows, col_widths=None):
 def _add_insight_bar(slide, left, top, width, text, bg_color=None):
     """Add an insight/takeaway bar at the bottom of a slide."""
     if bg_color is None:
-        bg_color = RGBColor(0xE0, 0xDD, 0xDD)
+        bg_color = RGBColor(0xE0, 0xE7, 0xFF)  # Soft premium indigo/blue
     bar = _add_rounded_rect(slide, left, top, width, Inches(0.75), fill_color=bg_color)
     _add_textbox(slide, left + Inches(0.3), top + Inches(0.1),
                  width - Inches(0.6), Inches(0.55), text,
-                 font_size=12, color=TEXT_DARK, alignment=PP_ALIGN.CENTER, italic=True)
+                 font_size=14, color=NAVY, alignment=PP_ALIGN.CENTER, italic=True)
 
 
 def _add_slide_title(slide, title_text, subtitle_text=None):
@@ -256,16 +263,16 @@ def _slide_2_financial_overview(prs, result):
     _add_slide_title(slide, title)
 
     # Left side — Total Claims card
-    _add_rounded_rect(slide, Inches(0.5), Inches(1.6), Inches(3), Inches(3.5),
+    _add_rounded_rect(slide, Inches(0.5), Inches(1.6), Inches(3), Inches(2.3),
                       fill_color=WHITE)
-    _add_textbox(slide, Inches(0.7), Inches(1.8), Inches(2.6), Inches(0.4),
+    _add_textbox(slide, Inches(0.7), Inches(1.7), Inches(2.6), Inches(0.3),
                  "Total Claims", font_size=16, bold=True, color=NAVY)
-    _add_textbox(slide, Inches(0.7), Inches(2.3), Inches(2.6), Inches(0.7),
-                 str(total_claims), font_size=48, bold=True, color=NAVY)
-    _add_textbox(slide, Inches(0.7), Inches(3.2), Inches(2.6), Inches(0.4),
+    _add_textbox(slide, Inches(0.7), Inches(2.0), Inches(2.6), Inches(0.5),
+                 str(total_claims), font_size=36, bold=True, color=NAVY)
+    _add_textbox(slide, Inches(0.7), Inches(2.7), Inches(2.6), Inches(0.3),
                  "Total Approved Amount", font_size=14, bold=True, color=COPPER)
-    _add_textbox(slide, Inches(0.7), Inches(3.7), Inches(2.6), Inches(0.6),
-                 _fmt_inr_full(total_incurred), font_size=32, bold=True, color=NAVY)
+    _add_textbox(slide, Inches(0.7), Inches(3.0), Inches(2.6), Inches(0.5),
+                 _fmt_inr_full(total_incurred), font_size=28, bold=True, color=NAVY)
 
     # Middle — Claim Volume breakdown
     _add_textbox(slide, Inches(4.2), Inches(1.6), Inches(4), Inches(0.4),
@@ -273,7 +280,7 @@ def _slide_2_financial_overview(prs, result):
 
     # Donut-like representation using shapes
     cx, cy = Inches(5.5), Inches(3.2)
-    _add_shape_rect(slide, Inches(4.0), Inches(2.2), Inches(4.2), Inches(2.8),
+    _add_shape_rect(slide, Inches(4.0), Inches(2.2), Inches(4.2), Inches(1.5),
                     fill_color=SLIDE_BG)
 
     # Cashless block
@@ -365,7 +372,7 @@ def _slide_3_status_distribution(prs, result):
     if status_dist:
         headers = ["Status", "Count", "Total Amount"]
         rows = []
-        for s in status_dist[:12]:
+        for s in status_dist[:10]:
             rows.append([s.get("status", "—"), str(s.get("count", 0)),
                         _fmt_inr(s.get("total_amt", 0))])
         _add_table(slide, Inches(0.6), Inches(2.1), Inches(6), headers, rows)
@@ -477,7 +484,7 @@ def _slide_5_hospital_breakdown(prs, result):
     bar_max_width = Inches(4.5)
     count_x = Inches(4.8)
 
-    for i, h in enumerate(hosp[:12]):
+    for i, h in enumerate(hosp[:10]):
         y = start_y + i * bar_spacing
         name = h.get("hospital", "Unknown")
         count = h.get("count", 0)
@@ -648,7 +655,7 @@ def _slide_8_fraud_flags(prs, result):
     # Flags table
     headers = ["Claim ID", "Employee", "Hospital", "Amount", "Signals"]
     rows = []
-    for f in flags[:12]:
+    for f in flags[:10]:
         signals = "; ".join(f.get("signals", [])[:2])
         rows.append([
             str(f.get("claim_id", "—"))[:15],
@@ -755,7 +762,7 @@ def _slide_10_conclusions(prs, result):
     ]
 
     card_w = Inches(12.4)
-    card_h = Inches(1.2)
+    card_h = Inches(1.0)
     start_y = Inches(1.8)
 
     for i, c in enumerate(cards):
@@ -769,13 +776,13 @@ def _slide_10_conclusions(prs, result):
                      c["title"], font_size=16, bold=True, color=NAVY)
 
         # Body text
-        _add_textbox(slide, Inches(1.5), y + Inches(0.55), Inches(10.8), Inches(0.55),
+        _add_textbox(slide, Inches(1.5), y + Inches(0.45), Inches(10.8), Inches(0.55),
                      c["text"], font_size=12, color=TEXT_DARK)
 
     # AI narrative at bottom (trimmed)
     if narrative:
         clean = narrative.replace("**", "").replace("*", "")[:300]
-        _add_textbox(slide, Inches(0.5), Inches(5.8), Inches(12.4), Inches(1.2),
+        _add_textbox(slide, Inches(0.5), Inches(5.6), Inches(12.4), Inches(1.2),
                      clean, font_size=10, color=TEXT_MED, italic=True)
 
 
