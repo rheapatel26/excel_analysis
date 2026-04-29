@@ -48,9 +48,9 @@ def _model(api_key: str | None = None):
     # confirmed available on this account:
     candidates = [
         "models/gemini-2.0-flash", 
-        "models/gemini-2.5-flash", 
-        "models/gemini-pro-latest", 
-        "models/gemini-flash-latest"
+        "models/gemini-1.5-flash", 
+        "models/gemini-1.5-pro",
+        "models/gemini-1.5-flash-latest"
     ]
     
     for m_name in candidates:

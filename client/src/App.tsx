@@ -57,6 +57,20 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
 
   const [isRestoring, setIsRestoring] = useState(false);
+  const [samples, setSamples] = useState<any[]>([]);
+
+  // Load samples on mount
+  React.useEffect(() => {
+    const fetchSamples = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/sample`);
+        setSamples(res.data.files || []);
+      } catch (e) {
+        console.error("Failed to load samples", e);
+      }
+    };
+    fetchSamples();
+  }, []);
 
   const steps = isRestoring 
     ? [
@@ -108,6 +122,25 @@ export default function App() {
       clearInterval(interval);
       const msg = err.response?.data?.error || err.message || 'Connection failed';
       alert(`Analysis failed: ${msg}. Please ensure the Python server is running.`);
+      setLoading(false);
+    }
+  };
+  
+  const analyzeSample = async (filename: string) => {
+    setLoading(true);
+    setIsRestoring(true);
+    setProgress(20);
+    setCurrentStep(0);
+    try {
+      const res = await axios.get(`${API_BASE}/api/sample/analyze/${filename}`);
+      setProgress(100);
+      setTimeout(() => {
+        setData(res.data);
+        localStorage.setItem('activeFile', filename);
+        setLoading(false);
+      }, 500);
+    } catch (err: any) {
+      alert("Failed to analyze sample dataset.");
       setLoading(false);
     }
   };
@@ -289,6 +322,30 @@ export default function App() {
           </div>
           <input type="file" className="hidden" onChange={handleFileUpload} accept=".xlsx,.xlsb,.xls,.csv" />
         </label>
+
+        {samples.length > 0 && (
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8">Quick Start with Sample Datasets</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {samples.map((s, i) => (
+                <button 
+                  key={i}
+                  onClick={() => analyzeSample(s.file)}
+                  className="p-5 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md hover:border-blue-200 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-[#001D4A] group-hover:text-white transition-all">
+                      <FileSpreadsheet size={16} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#0068B1]">{s.file.split('.').pop()}</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#001D4A] truncate mb-1">{s.file.split('_').pop()?.replace('.xlsb', '').replace('.xlsx', '') || s.file}</div>
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{(s.size / 1024).toFixed(0)} KB • Institutional</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <img src="/assets/logo_circular.png" className="fixed bottom-[-10%] right-[-5%] w-[600px] h-[600px] opacity-[0.03] pointer-events-none" alt="BG" />
